@@ -3,6 +3,10 @@
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -14,17 +18,33 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "7aa487cb-ee1e-4017-801b-39a479d3ee6d"
+				"spark.autotune.trackingId": "4615617d-01f4-4170-9a4a-963db24f7b85"
 			}
 		},
 		"metadata": {
 			"saveOutput": true,
-			"synapse_widget": {
-				"version": "0.1"
-			},
 			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -97,7 +117,8 @@
 					"\"\"\")\n",
 					"\n",
 					"print(\"Table optimized with Z-ORDER.\")"
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -178,7 +199,8 @@
 					"\"\"\")\n",
 					"\n",
 					"print(\"Table optimized with Z-ORDER.\")"
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -276,7 +298,8 @@
 					"\"\"\")\n",
 					"\n",
 					"print(\"Table optimized with Z-ORDER.\")"
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -365,7 +388,8 @@
 					"\"\"\")\n",
 					"\n",
 					"print(\"Table optimized with Z-ORDER.\")"
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -443,7 +467,8 @@
 					"# Note: Permissions cannot be directly set in Delta Lake. \n",
 					"# You'll need to handle access control at the storage or Spark SQL level.\n",
 					"print(\"Note: Remember to set appropriate access controls for this table.\")"
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
@@ -512,7 +537,8 @@
 					"\"\"\")\n",
 					"\n",
 					"print(\"Table optimized with Z-ORDER.\")"
-				]
+				],
+				"execution_count": null
 			}
 		]
 	}
