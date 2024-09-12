@@ -1,0 +1,231 @@
+{
+	"name": "2_create_ref_tables",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b02c4af7-aed5-4556-884e-9bb8ebc5096b"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_SensitiveCodesSNOMED"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"snomed\", StringType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_SensitiveCodesSNOMED\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_SensitiveCodesSNOMED created successfully.\")\n",
+					"\n",
+					"# Add table properties (similar to extended properties in SQL Server)\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"delta_table.properties.set(\n",
+					"    \"comment\", \n",
+					"    \"https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx\"\n",
+					")\n",
+					"\n",
+					"print(\"Table properties added successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table RefNC_ClinicalNoteTypes"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType, TimestampType, BooleanType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\n",
+					"    StructField(\"DataRows\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Length_Min\", LongType(), nullable=True),\n",
+					"    StructField(\"Length_Max\", LongType(), nullable=True),\n",
+					"    StructField(\"Timestamp_Min\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Timestamp_Max\", TimestampType(), nullable=True),\n",
+					"    StructField(\"CensusDate\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ECDS_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"CISD_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"BI_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"Usage_Notes\", StringType(), nullable=True),\n",
+					"    StructField(\"eSearcher_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"OCC_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"LiveFlow_Use\", BooleanType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/RefNC_ClinicalNoteTypes\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table RefNC_ClinicalNoteTypes created successfully.\")\n",
+					"\n",
+					"# Add table properties (similar to extended properties in SQL Server)\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Add column descriptions\n",
+					"delta_table.updateMetadata({\n",
+					"    \"ECDS_Use\": \"Clinical note used in ECDS reporting\",\n",
+					"    \"CISD_Use\": \"Clinical note used by CISDev\",\n",
+					"    \"BI_Use\": \"Clinical note used by BI (Information Management)\"\n",
+					"})\n",
+					"\n",
+					"print(\"Table properties added successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table refNC_eventType"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"NCCode\", StringType(), nullable=True),\n",
+					"    StructField(\"NCDescription\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/refNC_eventType\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table refNC_eventType created successfully.\")\n",
+					"\n",
+					"# Add table properties (similar to extended properties in SQL Server)\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# You can add any additional metadata or comments here if needed\n",
+					"# For example:\n",
+					"# delta_table.updateMetadata({\n",
+					"#     \"comment\": \"Reference table for NC event types\"\n",
+					"# })\n",
+					"\n",
+					"print(\"Delta table created and metadata added successfully.\")"
+				]
+			}
+		]
+	}
+}

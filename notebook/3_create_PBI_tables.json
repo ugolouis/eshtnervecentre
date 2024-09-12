@@ -1,0 +1,369 @@
+{
+	"name": "3_create_PBI_tables",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "26402086-bf08-4b4f-afee-7da3a24f0348"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table LiveAE_Attends_tbl"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, FloatType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"SiteDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"DeptType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"AttTypeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"visitid\", StringType(), nullable=True),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=True),\n",
+					"    StructField(\"PAS_NO\", StringType(), nullable=True),\n",
+					"    StructField(\"dob\", TimestampType(), nullable=True),\n",
+					"    StructField(\"natlnumber\", StringType(), nullable=True),\n",
+					"    StructField(\"gender\", StringType(), nullable=True),\n",
+					"    StructField(\"ED_Presenting_Complaint\", StringType(), nullable=True),\n",
+					"    StructField(\"Acuity\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalDateTime\", TimestampType(), nullable=False),\n",
+					"    StructField(\"ManchesterOnlyDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TreatmentDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ActualDTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TransferedToCDUDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ReadyForDischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischStatusName\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDest\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"AdmDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"TimeinED\", IntegerType(), nullable=True),\n",
+					"    StructField(\"ClockStopDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"BreachReason\", StringType(), nullable=True),\n",
+					"    StructField(\"LastLocation\", StringType(), nullable=True),\n",
+					"    StructField(\"lastBed\", StringType(), nullable=True),\n",
+					"    StructField(\"LastEvent\", StringType(), nullable=True),\n",
+					"    StructField(\"StreamingScoreDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"NewTriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AEgroup\", StringType(), nullable=True),\n",
+					"    StructField(\"AEgroupNo\", IntegerType(), nullable=True),\n",
+					"    StructField(\"WaitGroup\", StringType(), nullable=False),\n",
+					"    StructField(\"Area\", StringType(), nullable=True),\n",
+					"    StructField(\"AttToday\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Breach\", IntegerType(), nullable=False),\n",
+					"    StructField(\"BreachTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AttTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/LiveAE_Attends_tbl\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table LiveAE_Attends_tbl created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table LiveAE_Breach_tbl"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"SiteDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"DeptType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"AttTypeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"visitid\", StringType(), nullable=True),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=True),\n",
+					"    StructField(\"PAS_NO\", StringType(), nullable=True),\n",
+					"    StructField(\"dob\", TimestampType(), nullable=True),\n",
+					"    StructField(\"natlnumber\", StringType(), nullable=True),\n",
+					"    StructField(\"gender\", StringType(), nullable=True),\n",
+					"    StructField(\"ED_Presenting_Complaint\", StringType(), nullable=True),\n",
+					"    StructField(\"Acuity\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalDateTime\", TimestampType(), nullable=False),\n",
+					"    StructField(\"ManchesterOnlyDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TreatmentDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ActualDTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TransferedToCDUDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ReadyForDischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischStatusName\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDest\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"AdmDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"TimeinED\", IntegerType(), nullable=True),\n",
+					"    StructField(\"ClockStopDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"BreachReason\", StringType(), nullable=True),\n",
+					"    StructField(\"LastLocation\", StringType(), nullable=True),\n",
+					"    StructField(\"lastBed\", StringType(), nullable=True),\n",
+					"    StructField(\"LastEvent\", StringType(), nullable=True),\n",
+					"    StructField(\"StreamingScoreDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"NewTriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AEgroup\", StringType(), nullable=True),\n",
+					"    StructField(\"AEgroupNo\", IntegerType(), nullable=True),\n",
+					"    StructField(\"WaitGroup\", StringType(), nullable=False),\n",
+					"    StructField(\"Area\", StringType(), nullable=True),\n",
+					"    StructField(\"AttToday\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Breach\", IntegerType(), nullable=False),\n",
+					"    StructField(\"BreachTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"BreachTimeV\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/LiveAE_Breach_tbl\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table LiveAE_Breach_tbl created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table LiveAE_InDept_tbl"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, FloatType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"SiteDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"DeptType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"AttTypeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"visitid\", StringType(), nullable=True),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=True),\n",
+					"    StructField(\"PAS_NO\", StringType(), nullable=True),\n",
+					"    StructField(\"dob\", TimestampType(), nullable=True),\n",
+					"    StructField(\"natlnumber\", StringType(), nullable=True),\n",
+					"    StructField(\"gender\", StringType(), nullable=True),\n",
+					"    StructField(\"ED_Presenting_Complaint\", StringType(), nullable=True),\n",
+					"    StructField(\"Acuity\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeCode\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalModeDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"ArrivalDateTime\", TimestampType(), nullable=False),\n",
+					"    StructField(\"ManchesterOnlyDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TreatmentDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ActualDTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DTADateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"TransferedToCDUDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"ReadyForDischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischargeDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"DischStatusName\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDest\", StringType(), nullable=True),\n",
+					"    StructField(\"DepartDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"AdmDestName\", StringType(), nullable=True),\n",
+					"    StructField(\"TimeinED\", IntegerType(), nullable=True),\n",
+					"    StructField(\"ClockStopDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"BreachReason\", StringType(), nullable=True),\n",
+					"    StructField(\"LastLocation\", StringType(), nullable=True),\n",
+					"    StructField(\"lastBed\", StringType(), nullable=True),\n",
+					"    StructField(\"LastEvent\", StringType(), nullable=True),\n",
+					"    StructField(\"StreamingScoreDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"NewTriageDateTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AEgroup\", StringType(), nullable=True),\n",
+					"    StructField(\"AEgroupNo\", IntegerType(), nullable=True),\n",
+					"    StructField(\"WaitGroup\", StringType(), nullable=False),\n",
+					"    StructField(\"Area\", StringType(), nullable=True),\n",
+					"    StructField(\"hrsTimeinDept\", StringType(), nullable=True),\n",
+					"    StructField(\"CDUTimeMins\", IntegerType(), nullable=True),\n",
+					"    StructField(\"CDUTime\", StringType(), nullable=True),\n",
+					"    StructField(\"ScatterSpread\", FloatType(), nullable=True),\n",
+					"    StructField(\"Category\", StringType(), nullable=True),\n",
+					"    StructField(\"DateRaised\", TimestampType(), nullable=True),\n",
+					"    StructField(\"RefTime\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/LiveAE_InDept_tbl\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table LiveAE_InDept_tbl created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table LiveAE_InDeptbyHour_tbl"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"Hr\", TimestampType(), nullable=True),\n",
+					"    StructField(\"SiteCode\", StringType(), nullable=True),\n",
+					"    StructField(\"InDept\", IntegerType(), nullable=True),\n",
+					"    StructField(\"TimeV\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/LiveAE_InDeptbyHour_tbl\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table LiveAE_InDeptbyHour_tbl created successfully.\")"
+				]
+			}
+		]
+	}
+}

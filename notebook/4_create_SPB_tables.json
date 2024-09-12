@@ -1,0 +1,519 @@
+{
+	"name": "4_create_SPB_tables",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "7aa487cb-ee1e-4017-801b-39a479d3ee6d"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ClinicalNoteData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, LongType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE ClinicalNoteData_Current\n",
+					"ADD CONSTRAINT pk_ClinicalNoteData_Current \n",
+					"PRIMARY KEY (visitarchiveid, NoteKey)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table ClinicalNoteData_Current created successfully.\")\n",
+					"\n",
+					"# Note: Indexes are not directly supported in Delta Lake, but you can optimize for specific queries using Z-ORDER BY\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE ClinicalNoteData_Current\n",
+					"ZORDER BY (NoteKey, visitarchiveid, Timestamp)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ClinicalNoteData_First"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_First\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_First USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE ClinicalNoteData_First\n",
+					"ADD CONSTRAINT pk_ClinicalNoteData_First \n",
+					"PRIMARY KEY (visitarchiveid, NoteKey)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table ClinicalNoteData_First created successfully.\")\n",
+					"\n",
+					"# Note: Indexes are not directly supported in Delta Lake, but you can optimize for specific queries using Z-ORDER BY\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE ClinicalNoteData_First\n",
+					"ZORDER BY (NoteKey, visitarchiveid)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table PatientData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, ShortType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientname\", StringType(), nullable=True),\n",
+					"    StructField(\"dob\", TimestampType(), nullable=True),\n",
+					"    StructField(\"hospnumber1\", StringType(), nullable=True),\n",
+					"    StructField(\"hospnumber2\", StringType(), nullable=True),\n",
+					"    StructField(\"altnumber\", StringType(), nullable=True),\n",
+					"    StructField(\"natlnumber\", StringType(), nullable=True),\n",
+					"    StructField(\"deceased\", ShortType(), nullable=True),\n",
+					"    StructField(\"male\", ShortType(), nullable=True),\n",
+					"    StructField(\"title\", StringType(), nullable=True),\n",
+					"    StructField(\"maritalstatus\", StringType(), nullable=True),\n",
+					"    StructField(\"religion\", StringType(), nullable=True),\n",
+					"    StructField(\"ethnicity\", StringType(), nullable=True),\n",
+					"    StructField(\"nationality\", StringType(), nullable=True),\n",
+					"    StructField(\"addressStreet\", StringType(), nullable=True),\n",
+					"    StructField(\"addressArea\", StringType(), nullable=True),\n",
+					"    StructField(\"addressCity\", StringType(), nullable=True),\n",
+					"    StructField(\"addressCounty\", StringType(), nullable=True),\n",
+					"    StructField(\"addressPostCode\", StringType(), nullable=True),\n",
+					"    StructField(\"addressCountry\", StringType(), nullable=True),\n",
+					"    StructField(\"preferredTelephone\", StringType(), nullable=True),\n",
+					"    StructField(\"dateTimeOfDeath\", TimestampType(), nullable=True),\n",
+					"    StructField(\"lastName\", StringType(), nullable=True),\n",
+					"    StructField(\"firstName\", StringType(), nullable=True),\n",
+					"    StructField(\"middleName\", StringType(), nullable=True),\n",
+					"    StructField(\"gender\", StringType(), nullable=True),\n",
+					"    StructField(\"gpPracticeID\", StringType(), nullable=True),\n",
+					"    StructField(\"unknownpatient\", ShortType(), nullable=True),\n",
+					"    StructField(\"recordlastupdated\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/PatientData_Current\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientData_Current USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE PatientData_Current\n",
+					"ADD CONSTRAINT pk_PatientData_Current \n",
+					"PRIMARY KEY (patientid)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table PatientData_Current created successfully.\")\n",
+					"\n",
+					"# Note: Indexes are not directly supported in Delta Lake, but you can optimize for specific queries using Z-ORDER BY\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE PatientData_Current\n",
+					"ZORDER BY (patientid)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table PatientVisitHistoryData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"eventTime\", TimestampType(), nullable=False),\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=True),\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\n",
+					"    StructField(\"ward\", StringType(), nullable=True),\n",
+					"    StructField(\"area\", StringType(), nullable=True),\n",
+					"    StructField(\"bed\", StringType(), nullable=True),\n",
+					"    StructField(\"consultant\", StringType(), nullable=True),\n",
+					"    StructField(\"speciality\", StringType(), nullable=True),\n",
+					"    StructField(\"visitid\", StringType(), nullable=True),\n",
+					"    StructField(\"mergedfrompatientid\", IntegerType(), nullable=True),\n",
+					"    StructField(\"recordedTime\", TimestampType(), nullable=True),\n",
+					"    StructField(\"eventType\", StringType(), nullable=True),\n",
+					"    StructField(\"replacedBy\", IntegerType(), nullable=True),\n",
+					"    StructField(\"timeto\", TimestampType(), nullable=True),\n",
+					"    StructField(\"source\", StringType(), nullable=True),\n",
+					"    StructField(\"RecordLastUpdated\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/PatientVisitHistoryData_Current\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientVisitHistoryData_Current USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE PatientVisitHistoryData_Current\n",
+					"ADD CONSTRAINT pk_PatientVisitHistoryData_Current \n",
+					"PRIMARY KEY (visitarchiveid, id)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table PatientVisitHistoryData_Current created successfully.\")\n",
+					"\n",
+					"# Optimize the table using Z-ORDER BY\n",
+					"# We'll use the columns from the clustered index and some frequently used columns in other indexes\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE PatientVisitHistoryData_Current\n",
+					"ZORDER BY (visitarchiveid, eventTime, id, eventType, EpisodeId)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table StoredProc_Log"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp, monotonically_increasing_id\n",
+					"from pyspark.sql.types import StructType, StructField, LongType, TimestampType, StringType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"ID\", LongType(), nullable=False),\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\n",
+					"    StructField(\"SP_Name\", StringType(), nullable=False),\n",
+					"    StructField(\"MessageText\", StringType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the ID column as a monotonically increasing ID (similar to IDENTITY)\n",
+					"df = df.withColumn(\"ID\", monotonically_increasing_id())\n",
+					"\n",
+					"# Add the Timestamp column with the current timestamp as default\n",
+					"df = df.withColumn(\"Timestamp\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/StoredProc_Log\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS StoredProc_Log USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE StoredProc_Log\n",
+					"ADD CONSTRAINT pk_StoredProc_Log \n",
+					"PRIMARY KEY (ID)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table StoredProc_Log created successfully.\")\n",
+					"\n",
+					"# Optimize the table using Z-ORDER BY\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE StoredProc_Log\n",
+					"ZORDER BY (ID, Timestamp, SP_Name)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")\n",
+					"\n",
+					"# Note: Permissions cannot be directly set in Delta Lake. \n",
+					"# You'll need to handle access control at the storage or Spark SQL level.\n",
+					"print(\"Note: Remember to set appropriate access controls for this table.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table VisitArchiveID_delta"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/VisitArchiveID_delta\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\n",
+					"\n",
+					"# Create Delta table\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS VisitArchiveID_delta USING DELTA LOCATION '{delta_table_path}'\")\n",
+					"\n",
+					"# Add constraints (primary key)\n",
+					"spark.sql(\"\"\"\n",
+					"ALTER TABLE VisitArchiveID_delta\n",
+					"ADD CONSTRAINT pk_VisitArchiveID_delta \n",
+					"PRIMARY KEY (visitarchiveid)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table VisitArchiveID_delta created successfully.\")\n",
+					"\n",
+					"# Optimize the table using Z-ORDER BY\n",
+					"spark.sql(\"\"\"\n",
+					"OPTIMIZE VisitArchiveID_delta\n",
+					"ZORDER BY (visitarchiveid)\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				]
+			}
+		]
+	}
+}

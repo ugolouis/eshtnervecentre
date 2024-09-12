@@ -1,0 +1,1730 @@
+{
+	"name": "1_create_ecds_source_tables",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "527b652a-7637-4568-8983-d8a27e349983"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Accomodation_Type table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\n",
+					"    StructField(\"AccomodationTypeDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"AccomodationDateAdded\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AccomodationTypeSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_Accomodation_Type created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_AlcoholDrug table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# from pyspark.sql.functions import current_timestamp\n",
+					"# from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"EC_Injury_Alcohol_Drug\", StringType(), nullable=False),\n",
+					"    StructField(\"AlcoholDrugDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_AlcoholDrug\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_AlcoholDrug created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_AttendanceOccurrence table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Prof_Reg_Issuer_Code\", StringType(), nullable=False),\n",
+					"    StructField(\"Prof_Reg_Entry_Identifier\", StringType(), nullable=False),\n",
+					"    StructField(\"Care_Prof_Tier\", StringType(), nullable=False),\n",
+					"    StructField(\"Care_Prof_Dis_Resp_Ind\", StringType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_AttendanceOccurrence\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_AttendanceOccurrence created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_CodedClinicalFindings table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ObsId\", IntegerType(), nullable=False),\n",
+					"    StructField(\"obsdetailsid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Coded_FindingSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_FindingDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_Finding_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_CodedClinicalFindings\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Note: Primary Key is (visitarchiveid, ObsId, obsdetailsid)\n",
+					"# Delta Lake doesn't support primary key constraints directly, but we can ensure data integrity in our write operations\n",
+					"\n",
+					"print(\"Delta table ECDS_CodedClinicalFindings created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_CodedClinicalObservations table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ObsId\", IntegerType(), nullable=False),\n",
+					"    StructField(\"obsdetailsid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Coded_ObservationSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_ObservationDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"Observation_Value\", StringType(), nullable=True),\n",
+					"    StructField(\"UCUM_Unit_of_Measurement\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_Observation_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_CodedClinicalObservations\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Note: Primary Key is (visitarchiveid, ObsId, obsdetailsid)\n",
+					"# Delta Lake doesn't support primary key constraints directly, but we can ensure data integrity in our write operations\n",
+					"\n",
+					"print(\"Delta table ECDS_CodedClinicalObservations created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_CodedScoredAssessment table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ObsId\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Coded_Assessment_Tool_TypeSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_Assessment_Tool_TypeDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"Person_Score\", StringType(), nullable=True),\n",
+					"    StructField(\"Assessment_Tool_Validation_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_CodedScoredAssessment\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Note: The original table had a non-clustered index on (visitarchiveid, Coded_Assessment_Tool_TypeDesc)\n",
+					"# Delta Lake handles indexing differently. Consider using these fields for partitioning or Z-ordering if needed.\n",
+					"\n",
+					"print(\"Delta table ECDS_CodedScoredAssessment created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Comorbidity table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ComorbidityIDOrder\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Comorbidity\", StringType(), nullable=False),\n",
+					"    StructField(\"ComorbidityDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Comorbidity\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_Comorbidity created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Diagnosis table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"DiagnosiosisDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Diagnosis_CodeSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Coded_Clinical_Entry_Seq_Num\", IntegerType(), nullable=False),\n",
+					"    StructField(\"EC_Diagnosis_QualifierSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"DiagnosisQualifierDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Diagnosis_LataralitySNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"DiagnosisLataralityDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"DiagnosisComment\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Diagnosis\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Note: The original table had a non-clustered index on (visitarchiveid)\n",
+					"# Delta Lake handles indexing differently. Consider using this field for partitioning or Z-ordering if needed.\n",
+					"\n",
+					"print(\"Delta table ECDS_Diagnosis created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Diagnosis_xTab table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema_fields = [\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False)\n",
+					"]\n",
+					"\n",
+					"# Dynamically create fields for diagnoses 1-10\n",
+					"for i in range(1, 11):\n",
+					"    schema_fields.extend([\n",
+					"        StructField(f\"Diagnosiosis{i}Desc\", StringType(), nullable=True),\n",
+					"        StructField(f\"EC_Diagnosis_Code{i}SNOMED\", StringType(), nullable=True),\n",
+					"        StructField(f\"DiagnosisQualifier{i}Desc\", StringType(), nullable=True),\n",
+					"        StructField(f\"EC_Diagnosis_Qualifier{i}SNOMED\", StringType(), nullable=True),\n",
+					"        StructField(f\"DiagnosisLatarality{i}Desc\", StringType(), nullable=True),\n",
+					"        StructField(f\"EC_Diagnosis_Latarality{i}SNOMED\", StringType(), nullable=True)\n",
+					"    ])\n",
+					"\n",
+					"# Add InsertedOn field\n",
+					"schema_fields.append(StructField(\"InsertedOn\", TimestampType(), nullable=True))\n",
+					"\n",
+					"# Create the schema\n",
+					"schema = StructType(schema_fields)\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Diagnosis_xTab\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_Diagnosis_xTab created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_EMED3_Fit_Note table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Assess_Date\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Condition\", StringType(), nullable=True),\n",
+					"    StructField(\"Diagnosis\", StringType(), nullable=True),\n",
+					"    StructField(\"Start_Date\", TimestampType(), nullable=True),\n",
+					"    StructField(\"End_Date\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Duration\", StringType(), nullable=True),\n",
+					"    StructField(\"Recorded_Date\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Follow_Up_Ind\", StringType(), nullable=True),\n",
+					"    StructField(\"Note_Issuer\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_EMED3_Fit_Note\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_EMED3_Fit_Note created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_ExpectedDateTimeOfTreatment table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Emergency_Care_Expected_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Emergency_Care_Treatment_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_ExpectedDateTimeOfTreatment\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_ExpectedDateTimeOfTreatment created successfully.\")\n",
+					""
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Investigations table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"InvestigationOrder\", IntegerType(), nullable=False),\n",
+					"    StructField(\"InvestigationDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Investigation_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_InvestigationCodeSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_InvestigationCodeCDS\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendedOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Investigations\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Note: The original table had a primary key constraint on (visitarchiveid, InvestigationOrder)\n",
+					"# Delta Lake doesn't support primary key constraints directly, but we can ensure data integrity in our write operations\n",
+					"\n",
+					"print(\"Delta table ECDS_Investigations created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_MentalHealthActLegalStatus table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\n",
+					"    StructField(\"MHA_LSCP_Start_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"MHA_LSCP_Expiry_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"MHA_LegalStatusClassifactionCode\", StringType(), nullable=False),\n",
+					"    StructField(\"MHA_LegalStatusClassifactionDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_MentalHealthActLegalStatus\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_MentalHealthActLegalStatus created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Personal_Circumstances table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Soc_Per_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Soc_Per_Description\", StringType(), nullable=True),\n",
+					"    StructField(\"Soc_Per_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Personal_Circumstances\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_Personal_Circumstances created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Procedure table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, LongType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ProcedureOrder\", LongType(), nullable=True),\n",
+					"    StructField(\"ProcedureDesc\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Procedure_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_ProcedureCodeSNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_ProcedureCodeCDS\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Procedure\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_Procedure created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_ReferralsToOtherServices table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\n",
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Referred_To_Service_Order\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Referred_To_Service_Code\", StringType(), nullable=False),\n",
+					"    StructField(\"Referred_To_Service_Desc\", StringType(), nullable=True),\n",
+					"    StructField(\"Activity_Service_Request_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Referred_To_Service_Assess_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_ReferralsToOtherServices\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_ReferralsToOtherServices created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_SafeguardingConcern table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Safeguarding_Concern\", StringType(), nullable=False),\n",
+					"    StructField(\"Safeguarding_Concern_Desc\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_SafeguardingConcern\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_SafeguardingConcern created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_StoredProc_Log table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp, expr\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, LongType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"LogID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"StepDescription\", StringType(), nullable=True),\n",
+					"    StructField(\"StepStart\", TimestampType(), nullable=True),\n",
+					"    StructField(\"StepFinish\", TimestampType(), nullable=True),\n",
+					"    StructField(\"StepDurationSecs\", LongType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the computed column StepDurationSecs\n",
+					"df = df.withColumn(\"StepDurationSecs\", \n",
+					"                   expr(\"cast(unix_timestamp(StepFinish) - unix_timestamp(StepStart) as long)\"))\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_StoredProc_Log\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_StoredProc_Log created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_UpdateErrorText table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"RunId\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ErrorText\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_UpdateErrorText\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDS_UpdateErrorText created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDStoCDS_MappingCodes "
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"MappingCodeID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"MappingSubType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"ECDSCode\", StringType(), nullable=False),\n",
+					"    StructField(\"ECDSDescription\", StringType(), nullable=True),\n",
+					"    StructField(\"CDS\", StringType(), nullable=True),\n",
+					"    StructField(\"InjFlag\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Active\", StringType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDStoCDS_MappingCodes\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDStoCDS_MappingCodes created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDStoCDS_MappingGroup"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"MappingCodeType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"MappingCodeDescription\", StringType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDStoCDS_MappingGroup\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDStoCDS_MappingGroup created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDStoCDS_MappingSubTypes"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"MappingSubType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"MappingCodeType\", IntegerType(), nullable=False),\n",
+					"    StructField(\"MappingSubTypeDescription\", StringType(), nullable=False),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDStoCDS_MappingSubTypes\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"print(\"Delta table ECDStoCDS_MappingSubTypes created successfully.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table refECDS_SensitiveCodesSNOMED"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType, StructField, StringType\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"snomed\", StringType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/refECDS_SensitiveCodesSNOMED\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Create a Delta table object\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Set the table properties to enforce constraints\n",
+					"delta_table.update_metadata({\n",
+					"    \"delta.constraints.snomed.type\": \"NOT_NULL,PRIMARY_KEY\"\n",
+					"})\n",
+					"\n",
+					"print(\"Delta table refECDS_SensitiveCodesSNOMED created successfully with PRIMARY KEY constraint.\")\n",
+					"\n",
+					"# Add table description as a comment\n",
+					"spark.sql(f\"\"\"\n",
+					"    COMMENT ON TABLE delta.`{delta_table_path}`\n",
+					"    IS 'https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Table description added as a comment.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_EmergencyVisitData_Main"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp, lit\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, DateType\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"visitid\", StringType(), nullable=False),\n",
+					"    StructField(\"Er_Visit_ID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Withheld_Identitiy_Reason\", StringType(), nullable=True),\n",
+					"    StructField(\"PATID_Extended\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_PATID\", StringType(), nullable=False),\n",
+					"    StructField(\"NHS_Number\", StringType(), nullable=True),\n",
+					"    StructField(\"NHS_Number_Status\", StringType(), nullable=True),\n",
+					"    StructField(\"UnstructuredPatient_Name\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonTitle\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonGivenName\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonFamilyName\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonNameSuffix\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonInititials\", StringType(), nullable=True),\n",
+					"    StructField(\"PersonRequestedName\", StringType(), nullable=True),\n",
+					"    StructField(\"UnstructuredAddress\", StringType(), nullable=True),\n",
+					"    StructField(\"AddressLine1\", StringType(), nullable=True),\n",
+					"    StructField(\"AddressLine2\", StringType(), nullable=True),\n",
+					"    StructField(\"AddressLine3\", StringType(), nullable=True),\n",
+					"    StructField(\"AddressLine4\", StringType(), nullable=True),\n",
+					"    StructField(\"AddressLine5\", StringType(), nullable=True),\n",
+					"    StructField(\"Postcode\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_Residence_Responsibility\", StringType(), nullable=True),\n",
+					"    StructField(\"DOB\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Gender\", StringType(), nullable=False),\n",
+					"    StructField(\"Ethnic_Cat\", StringType(), nullable=True),\n",
+					"    StructField(\"Ethnic_Cat_2021\", StringType(), nullable=True),\n",
+					"    StructField(\"Accomm_Status\", StringType(), nullable=True),\n",
+					"    StructField(\"Pref_Spoken_Lang\", StringType(), nullable=True),\n",
+					"    StructField(\"Accessible_Inf_Pro_Required\", StringType(), nullable=True),\n",
+					"    StructField(\"Interpreter_Language\", StringType(), nullable=True),\n",
+					"    StructField(\"Overseas_Vis_Charging_Cat_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Overseas_Vis_Charging_Cat_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"Reg_GP\", StringType(), nullable=True),\n",
+					"    StructField(\"Reg_Prac\", StringType(), nullable=True),\n",
+					"    StructField(\"Site_Code_Of_Treatment\", StringType(), nullable=True),\n",
+					"    StructField(\"NervecenterWard\", StringType(), nullable=True),\n",
+					"    StructField(\"EmergencyCareDepartmentType\", StringType(), nullable=True),\n",
+					"    StructField(\"AmbulanceIncidentNumber\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_Conveying_Ambulance_Trust\", StringType(), nullable=True),\n",
+					"    StructField(\"Care_Contact_Identifier_AmbulanceService\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Att_No\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Consultation_Mechanism\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Arrival_Mode_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Arrival_Mode_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Att_Cat_ECDS\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_ATT_Cat_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Att_Source_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_ATT_Source_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_Att_Source\", StringType(), nullable=True),\n",
+					"    StructField(\"Arrival_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Age_at_CDS_Activity_Date\", StringType(), nullable=True),\n",
+					"    StructField(\"Initial_Assmt_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Emergency_Care_Acuity\", StringType(), nullable=True),\n",
+					"    StructField(\"Manchester_Triage_Score\", StringType(), nullable=True),\n",
+					"    StructField(\"Emergency_Care_Chief_Complaint_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"Emergency_Care_Chief_Complaint_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"Date_Time_Seen_for_Treatment\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_Extended_Care_Episode_Identifer\", StringType(), nullable=True),\n",
+					"    StructField(\"Injury_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_Place_Of_Injury_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Place_Of_Injury_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Latitude\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Longitude\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Intent_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Intent_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Activity_Status_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Activity_Status_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Activity_Type_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Activity_Type_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Mechanism_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Injury_Mechanism_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"Assault_Location_Description\", StringType(), nullable=True),\n",
+					"    StructField(\"Comm_Serial_No\", StringType(), nullable=True),\n",
+					"    StructField(\"SLA_No\", StringType(), nullable=True),\n",
+					"    StructField(\"Prov_Ref_No\", StringType(), nullable=True),\n",
+					"    StructField(\"Comm_Ref_No\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_Prov\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Code_Comm\", StringType(), nullable=True),\n",
+					"    StructField(\"Decided_To_Admit_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"Act_Treat_Code_Decision_to_Admit\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Clinically_Ready_to_Proceed_Timestamp\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Status_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Status_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Attendance_Conclusion_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_Departure_Date_Time\", TimestampType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Destination_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Destination_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"Org_Site_ID_Discharge_From_EC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Follow_Up_SNOMED\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Follow_Up_DESC\", StringType(), nullable=True),\n",
+					"    StructField(\"EC_Discharge_Info_Given\", StringType(), nullable=True),\n",
+					"    StructField(\"Clinical_Trial_Identifier\", StringType(), nullable=True),\n",
+					"    StructField(\"Disease_Outbreak_Notification\", StringType(), nullable=True),\n",
+					"    StructField(\"Disease_Outbreak_Notification_Desc\", StringType(), nullable=True),\n",
+					"    StructField(\"EpisodeID\", IntegerType(), nullable=True),\n",
+					"    StructField(\"Sensitive_Flag\", StringType(), nullable=True),\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\n",
+					"    StructField(\"AmendedOn\", TimestampType(), nullable=True)\n",
+					"])\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add default values\n",
+					"df = df.withColumn(\"Sensitive_Flag\", lit(\"N\"))\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_EmergencyVisitData_Main\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Create a Delta table object\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Set the table properties to enforce constraints\n",
+					"delta_table.update_metadata({\n",
+					"    \"delta.constraints.visitarchiveid.type\": \"NOT_NULL,PRIMARY_KEY\"\n",
+					"})\n",
+					"\n",
+					"# Create a non-clustered index\n",
+					"spark.sql(f\"\"\"\n",
+					"    CREATE INDEX IF NOT EXISTS IX_ArrivalDateTime\n",
+					"    ON delta.`{delta_table_path}` (Arrival_Date_Time)\n",
+					"    USING BLOOM\n",
+					"    OPTIONS ('bloomFilterSize' = '262144', 'numTasksForIndexing' = '2')\n",
+					"\"\"\")\n",
+					"\n",
+					"print(\"Delta table ECDS_EmergencyVisitData_Main created successfully with PRIMARY KEY constraint and index.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_Investigations_xTab"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Add fields for each of the 30 investigation codes\n",
+					"for i in range(1, 31):\n",
+					"    schema.add(f\"EC_InvestigationCode{i}SNOMED\", StringType(), True)\n",
+					"    schema.add(f\"EC_InvestigationCode{i}CDS\", StringType(), True)\n",
+					"    schema.add(f\"EC_InvestigationCode{i}Date\", TimestampType(), True)\n",
+					"    schema.add(f\"EC_InvestigationCode{i}Desc\", StringType(), True)\n",
+					"\n",
+					"# Add InsertedOn field\n",
+					"schema.add(\"InsertedOn\", TimestampType(), True)\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Investigations_xTab\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Create a Delta table object\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Set the table properties to enforce constraints\n",
+					"delta_table.update_metadata({\n",
+					"    \"delta.constraints.visitarchiveid.type\": \"NOT_NULL,PRIMARY_KEY\"\n",
+					"})\n",
+					"\n",
+					"print(\"Delta table ECDS_Investigations_xTab created successfully with PRIMARY KEY constraint.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDSGrouperInput"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp, lit\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\n",
+					"    StructField(\"Er_Visit_ID\", IntegerType(), nullable=False),\n",
+					"    StructField(\"PatID\", StringType(), True),\n",
+					"    StructField(\"Site_Code_Of_Treatment\", StringType(), True),\n",
+					"    StructField(\"Arrival_Date_Time\", TimestampType(), nullable=False),\n",
+					"    StructField(\"EC_Attendance_Conclusion_Date_Time\", TimestampType(), True),\n",
+					"    StructField(\"EmergencyCareDepartmentType\", StringType(), True),\n",
+					"    StructField(\"PatientAge\", IntegerType(), True),\n",
+					"    StructField(\"PatientGroup\", StringType(), True)\n",
+					"])\n",
+					"\n",
+					"# Add fields for each of the 30 investigation codes\n",
+					"for i in range(1, 31):\n",
+					"    schema.add(f\"EC_InvestigationCode{i}CDS\", StringType(), True)\n",
+					"\n",
+					"# Add fields for each of the 30 procedure codes\n",
+					"for i in range(1, 31):\n",
+					"    schema.add(f\"ProcCode{i}CDS\", StringType(), True)\n",
+					"\n",
+					"# Add remaining fields\n",
+					"schema.add(\"Streamed_Flag\", StringType(), True)\n",
+					"schema.add(\"Sensitive_Flag\", StringType(), True)\n",
+					"schema.add(\"InsertedOn\", TimestampType(), nullable=False)\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add default values\n",
+					"df = df.withColumn(\"EmergencyCareDepartmentType\", lit(\"1\"))\n",
+					"df = df.withColumn(\"Sensitive_Flag\", lit(\"N\"))\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDSGrouperInput\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Create a Delta table object\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Set the table properties to enforce constraints\n",
+					"delta_table.update_metadata({\n",
+					"    \"delta.constraints.visitarchiveid.type\": \"NOT_NULL,PRIMARY_KEY\"\n",
+					"})\n",
+					"\n",
+					"print(\"Delta table ECDSGrouperInput created successfully with PRIMARY KEY constraint and default values.\")"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_Procedures_xTab"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\n",
+					"from delta.tables import DeltaTable\n",
+					"\n",
+					"# Define the schema for the table\n",
+					"schema = StructType([\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False)\n",
+					"])\n",
+					"\n",
+					"# Add fields for each of the 30 procedure codes\n",
+					"for i in range(1, 31):\n",
+					"    schema.add(f\"ProcCode{i}SNOMED\", StringType(), True)\n",
+					"    schema.add(f\"ProcCode{i}CDS\", StringType(), True)\n",
+					"    schema.add(f\"ProcCode{i}Date\", TimestampType(), True)\n",
+					"    schema.add(f\"ProcCode{i}Desc\", StringType(), True)\n",
+					"\n",
+					"# Add InsertedOn field\n",
+					"schema.add(\"InsertedOn\", TimestampType(), True)\n",
+					"\n",
+					"# Create an empty DataFrame with the defined schema\n",
+					"df = spark.createDataFrame([], schema)\n",
+					"\n",
+					"# Add the InsertedOn column with the current timestamp as default\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
+					"\n",
+					"# Define the path for the Delta table\n",
+					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_Procedures_xTab\"\n",
+					"\n",
+					"# Write the DataFrame as a Delta table\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",
+					"\n",
+					"# Create a Delta table object\n",
+					"delta_table = DeltaTable.forPath(spark, delta_table_path)\n",
+					"\n",
+					"# Set the table properties to enforce constraints\n",
+					"delta_table.update_metadata({\n",
+					"    \"delta.constraints.visitarchiveid.type\": \"NOT_NULL,PRIMARY_KEY\"\n",
+					"})\n",
+					"\n",
+					"print(\"Delta table ECDS_Procedures_xTab created successfully with PRIMARY KEY constraint.\")"
+				]
+			}
+		]
+	}
+}
