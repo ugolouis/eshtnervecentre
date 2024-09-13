@@ -14,7 +14,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "332a0974-c9ae-4f99-bf5d-e9dbf556a3d4"
+				"spark.autotune.trackingId": "50ac77eb-c921-4783-b8bd-30e8e5721394"
 			}
 		},
 		"metadata": {
@@ -67,7 +67,7 @@
 					"df = df.withColumn(\"InsertedOn\", current_timestamp())\n",
 					"\n",
 					"# Define the path for the Delta table\n",
-					"delta_table_path = \"abfss://Curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\n",
 					"\n",
 					"# Write the DataFrame as a Delta table\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\n",

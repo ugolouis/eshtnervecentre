@@ -1,0 +1,107 @@
+{
+	"name": "nb_create_ECDS_schema",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "81731764-af82-459a-b32f-6a6f2557809a"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Import functions\r\n",
+					"from pyspark.sql.functions import current_timestamp\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"from delta.tables import DeltaTable"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create ECDS_Accomodation_Type table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Schema definition (unchanged)\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationDateAdded\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeSNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Add the InsertedOn column with the current timestamp as default\r\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table with error handling\r\n",
+					"try:\r\n",
+					"    df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table ECDS_Accomodation_Type created successfully.\")\r\n",
+					"    \r\n",
+					"    # Verify the table was created\r\n",
+					"    if DeltaTable.isDeltaTable(spark, delta_table_path):\r\n",
+					"        print(\"Verified: The table is a valid Delta table.\")\r\n",
+					"    else:\r\n",
+					"        print(\"Warning: The table doesn't seem to be a valid Delta table.\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error creating Delta table: {str(e)}\")\r\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

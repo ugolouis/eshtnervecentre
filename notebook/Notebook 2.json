@@ -1,0 +1,422 @@
+{
+	"name": "Notebook 2",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "8ae23af8-9022-4990-a1d5-eda9290bc360"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Write to Parquet"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql import Row\r\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"firstName\", StringType(), True),\r\n",
+					"    StructField(\"lastName\", StringType(), True),\r\n",
+					"    StructField(\"email\", StringType(), True),\r\n",
+					"    StructField(\"salary\", IntegerType(), True)\r\n",
+					"])"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Define content \r\n",
+					"Employee = Row(\"firstName\", \"lastName\", \"email\", \"salary\")\r\n",
+					"\r\n",
+					"employee1 = Employee('Јован', 'Поповић', 'jovan.popovic@contoso.com', 100000)\r\n",
+					"employee2 = Employee('John', 'Doe', 'john.doe@contoso.com', 120000 )\r\n",
+					"employee3 = Employee('', None, 'casper@contoso.com', 160000 )\r\n",
+					"employee4 = Employee('Confucius', '孔子', 'confucius@contoso.cocom', 160000 )\r\n",
+					""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create a list of employees\r\n",
+					"employees = [employee1, employee2, employee3, employee4]"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create the DataFrame\r\n",
+					"df = spark.createDataFrame(employees, schema)"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Show the DataFrame\r\n",
+					"df.show()\r\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"display(df)"
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"df.write.parquet(\"abfss://curated@louisstr.dfs.core.windows.net/contoso/sales/employees\")"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Write to Delta"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql import Row\r\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType\r\n",
+					"from datetime import date\r\n",
+					"\r\n",
+					"# Define the schema\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"product_id\", StringType(), False),\r\n",
+					"    StructField(\"product_name\", StringType(), False),\r\n",
+					"    StructField(\"category\", StringType(), False),\r\n",
+					"    StructField(\"price\", IntegerType(), True),\r\n",
+					"    StructField(\"units_sold\", IntegerType(), True),\r\n",
+					"    StructField(\"sale_date\", DateType(), True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create sample data\r\n",
+					"product_sales = [\r\n",
+					"    Row(\"P001\", \"Ergonomic Chair\", \"Office Furniture\", 299, 50, date(2023, 1, 15)),\r\n",
+					"    Row(\"P002\", \"Wireless Mouse\", \"Computer Accessories\", 49, 200, date(2023, 2, 1)),\r\n",
+					"    Row(\"P003\", \"LED Monitor\", \"Computer Hardware\", 199, 75, date(2023, 2, 10)),\r\n",
+					"    Row(\"P004\", \"Mechanical Keyboard\", \"Computer Accessories\", 129, 100, date(2023, 3, 5))\r\n",
+					"]\r\n",
+					"\r\n",
+					"# Create DataFrame\r\n",
+					"df = spark.createDataFrame(product_sales, schema)\r\n",
+					"\r\n",
+					"# Show the DataFrame\r\n",
+					"df.show()"
+				],
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"import uuid\r\n",
+					"\r\n",
+					"# Generate a unique identifier for the table name\r\n",
+					"unique_id = str(uuid.uuid4()).replace(\"-\", \"_\")\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = f\"abfss://curated@louisstr.dfs.core.windows.net/redcentric/reading/product_sales_{unique_id}\""
+				],
+				"execution_count": 24
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"try:\r\n",
+					"    df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\r\n",
+					"    print(f\"Successfully wrote Delta table to: {delta_table_path}\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error writing Delta table: {str(e)}\")"
+				],
+				"execution_count": 25
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"\r\n",
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationDateAdded\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeSNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Add the InsertedOn column with the current timestamp as default\r\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Delta table ECDS_Accomodation_Type created successfully.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"from delta.tables import DeltaTable\r\n",
+					"\r\n",
+					"# Schema definition (unchanged)\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"IdOrder\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationDateAdded\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AccomodationTypeSNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Add the InsertedOn column with the current timestamp as default\r\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Accomodation_Type\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table with error handling\r\n",
+					"try:\r\n",
+					"    df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table ECDS_Accomodation_Type created successfully.\")\r\n",
+					"    \r\n",
+					"    # Verify the table was created\r\n",
+					"    if DeltaTable.isDeltaTable(spark, delta_table_path):\r\n",
+					"        print(\"Verified: The table is a valid Delta table.\")\r\n",
+					"    else:\r\n",
+					"        print(\"Warning: The table doesn't seem to be a valid Delta table.\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error creating Delta table: {str(e)}\")\r\n",
+					""
+				],
+				"execution_count": 26
+			}
+		]
+	}
+}

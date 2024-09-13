@@ -1,0 +1,599 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "148f91f4-d287-40ea-9655-2a85c4bd2b6b"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, LongType\r\n",
+					"\r\n",
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Add the InsertedOn column with the current timestamp as default\r\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://Curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
+					"\r\n",
+					"# Add constraints (primary key)\r\n",
+					"spark.sql(\"\"\"\r\n",
+					"ALTER TABLE ClinicalNoteData_Current\r\n",
+					"ADD CONSTRAINT pk_ClinicalNoteData_Current \r\n",
+					"PRIMARY KEY (visitarchiveid, NoteKey)\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"print(\"Delta table ClinicalNoteData_Current created successfully.\")\r\n",
+					"\r\n",
+					"# Note: Indexes are not directly supported in Delta Lake, but you can optimize for specific queries using Z-ORDER BY\r\n",
+					"spark.sql(\"\"\"\r\n",
+					"OPTIMIZE ClinicalNoteData_Current\r\n",
+					"ZORDER BY (NoteKey, visitarchiveid, Timestamp)\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Debugging Steps for Delta Table Write Operation\r\n",
+					"\r\n",
+					"# 1. Verify Delta Lake is properly installed and imported\r\n",
+					"from delta import *"
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 2. Check Spark session configuration\r\n",
+					"print(spark.sparkContext.getConf().getAll())"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 3. Verify write permissions to the destination path\r\n",
+					"try:\r\n",
+					"    # Write a test file to check permissions\r\n",
+					"    test_df = spark.createDataFrame([(\"test\",)], [\"col\"])\r\n",
+					"    test_path = \"abfss://curated@louisstr.dfs.core.windows.net/test_write_permissions\"\r\n",
+					"    test_df.write.mode(\"overwrite\").parquet(test_path)\r\n",
+					"    print(\"Write permissions verified\")\r\n",
+					"    # Clean up test file\r\n",
+					"    dbutils.fs.rm(test_path, recurse=True)\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Permission error: {str(e)}\")"
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 4. Verify the schema and data types\r\n",
+					"print(df.printSchema())"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 5. Try writing with more verbose error reporting\r\n",
+					"try:\r\n",
+					"    df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table written successfully\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error writing Delta table: {str(e)}\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 6. If the above fails, try writing as Parquet first\r\n",
+					"parquet_path = \"abfss://Curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current_parquet\"\r\n",
+					"try:\r\n",
+					"    df.write.mode(\"overwrite\").parquet(parquet_path)\r\n",
+					"    print(\"Parquet file written successfully\")\r\n",
+					"    \r\n",
+					"    # Then try to convert Parquet to Delta\r\n",
+					"    DeltaTable.convertToDelta(spark, f\"parquet.`{parquet_path}`\")\r\n",
+					"    print(\"Parquet converted to Delta successfully\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error in Parquet write or conversion: {str(e)}\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# 7. If all else fails, try writing the Delta table in batch mode\r\n",
+					"try:\r\n",
+					"    df.repartition(10).write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table written successfully in batch mode\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error writing Delta table in batch mode: {str(e)}\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"\r\n",
+					"# 2. Check Spark session configuration\r\n",
+					"print(spark.sparkContext.getConf().getAll())\r\n",
+					"\r\n",
+					"# 3. Verify write permissions to the destination path\r\n",
+					"try:\r\n",
+					"    # Write a test file to check permissions\r\n",
+					"    test_df = spark.createDataFrame([(\"test\",)], [\"col\"])\r\n",
+					"    test_path = \"abfss://Curated@louisstr.dfs.core.windows.net/test_write_permissions\"\r\n",
+					"    test_df.write.mode(\"overwrite\").parquet(test_path)\r\n",
+					"    print(\"Write permissions verified\")\r\n",
+					"    # Clean up test file\r\n",
+					"    dbutils.fs.rm(test_path, recurse=True)\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Permission error: {str(e)}\")\r\n",
+					"\r\n",
+					"# 4. Verify the schema and data types\r\n",
+					"print(df.printSchema())\r\n",
+					"\r\n",
+					"# 5. Try writing with more verbose error reporting\r\n",
+					"try:\r\n",
+					"    df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table written successfully\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error writing Delta table: {str(e)}\")\r\n",
+					"\r\n",
+					"# 6. If the above fails, try writing as Parquet first\r\n",
+					"parquet_path = \"abfss://Curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current_parquet\"\r\n",
+					"try:\r\n",
+					"    df.write.mode(\"overwrite\").parquet(parquet_path)\r\n",
+					"    print(\"Parquet file written successfully\")\r\n",
+					"    \r\n",
+					"    # Then try to convert Parquet to Delta\r\n",
+					"    DeltaTable.convertToDelta(spark, f\"parquet.`{parquet_path}`\")\r\n",
+					"    print(\"Parquet converted to Delta successfully\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error in Parquet write or conversion: {str(e)}\")\r\n",
+					"\r\n",
+					"# 7. If all else fails, try writing the Delta table in batch mode\r\n",
+					"try:\r\n",
+					"    df.repartition(10).write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"    print(\"Delta table written successfully in batch mode\")\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Error writing Delta table in batch mode: {str(e)}\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Simple test"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Import necessary libraries\r\n",
+					"from pyspark.sql.functions import lit"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create a test DataFrame\r\n",
+					"test_df = spark.createDataFrame([(1,)], [\"test_col\"])"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"# # Construct a valid test path\r\n",
+					"# valid_test_path = \"abfss://curated@louisstr.dfs.core.windows.net/test-write-permissions\""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"root_test_path = \"abfss://curated@louisstr.dfs.core.windows.net/test-file.parquet\""
+				],
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"root_test_path = \"abfss://curated@louisstr.dfs.core.windows.net/\""
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"print(root_test_path)"
+				],
+				"execution_count": 21
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"test_df.write.mode(\"overwrite\").parquet(root_test_path)"
+				],
+				"execution_count": 22
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"try:\r\n",
+					"    test_df.write.mode(\"overwrite\").parquet(root_test_path)\r\n",
+					"    print(\"Write permissions verified successfully at container root\")\r\n",
+					"    \r\n",
+					"    # Clean up the test file\r\n",
+					"    dbutils.fs.rm(root_test_path, recurse=True)\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Root permission error: {str(e)}\")"
+				],
+				"execution_count": 13
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Attempt to write the test DataFrame\r\n",
+					"try:\r\n",
+					"    test_df.write.mode(\"overwrite\").parquet(valid_test_path)\r\n",
+					"    print(\"Write permissions verified successfully\")\r\n",
+					"    \r\n",
+					"    # Clean up the test file\r\n",
+					"    dbutils.fs.rm(valid_test_path, recurse=True)\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Permission error: {str(e)}\")"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# If the above fails, try writing to the root of the container\r\n",
+					"root_test_path = \"abfss://curated@louisstr.dfs.core.windows.net/test-file.parquet\"\r\n",
+					"\r\n",
+					"try:\r\n",
+					"    test_df.write.mode(\"overwrite\").parquet(root_test_path)\r\n",
+					"    print(\"Write permissions verified successfully at container root\")\r\n",
+					"    \r\n",
+					"    # Clean up the test file\r\n",
+					"    dbutils.fs.rm(root_test_path, recurse=True)\r\n",
+					"except Exception as e:\r\n",
+					"    print(f\"Root permission error: {str(e)}\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"    \r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"# If both attempts fail, check Azure credentials\r\n",
+					"print(\"Current Azure Storage configurations:\")\r\n",
+					"print(spark.conf.get(\"fs.azure.account.auth.type.louisstr.dfs.core.windows.net\"))\r\n",
+					"print(spark.conf.get(\"fs.azure.account.oauth.provider.type.louisstr.dfs.core.windows.net\"))\r\n",
+					"print(spark.conf.get(\"fs.azure.account.oauth2.client.id.louisstr.dfs.core.windows.net\"))\r\n",
+					"print(spark.conf.get(\"fs.azure.account.oauth2.client.endpoint.louisstr.dfs.core.windows.net\"))"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

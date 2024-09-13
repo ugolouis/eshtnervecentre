@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "f3116ad6-a3c6-4cb7-8d50-d7687d44017d"
+				"spark.autotune.trackingId": "81e54afc-8ba9-439b-b45e-82331a3fa885"
 			}
 		},
 		"metadata": {
@@ -61,6 +61,272 @@
 				"source": [
 					"### Create table ClinicalNoteData_Current"
 				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.functions import current_timestamp\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, LongType"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					""
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"print(\"Dataframe shape:\", (df.count(), len(df.columns)))\r\n",
+					"print(\"\\nColumn names:\", df.columns)\r\n",
+					"print(\"\\nSchema:\")\r\n",
+					"df.printSchema()\r\n",
+					"print(\"\\nSample data:\")\r\n",
+					"display(df.limit(5))\r\n",
+					"print(\"\\nSummary statistics:\")\r\n",
+					"df.describe().show()"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"df.show()"
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Add the InsertedOn column with the current timestamp as default\r\n",
+					"df = df.withColumn(\"InsertedOn\", current_timestamp())"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"storage_account = \"louisstr\"\r\n",
+					"container = \"curated\"\r\n",
+					"path = \"ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"\r\n",
+					"delta_table_path = f\"abfss://{container}@{storage_account}.dfs.core.windows.net/{path}\"\r\n",
+					"print(delta_table_path)"
+				],
+				"execution_count": 16
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\""
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)"
+				],
+				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Create Delta table\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Add constraints (primary key)\r\n",
+					"spark.sql(\"\"\"\r\n",
+					"ALTER TABLE ClinicalNoteData_Current\r\n",
+					"ADD CONSTRAINT pk_ClinicalNoteData_Current \r\n",
+					"PRIMARY KEY (visitarchiveid, NoteKey)\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"print(\"Delta table ClinicalNoteData_Current created successfully.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Note: Indexes are not directly supported in Delta Lake, but you can optimize for specific queries using Z-ORDER BY\r\n",
+					"spark.sql(\"\"\"\r\n",
+					"OPTIMIZE ClinicalNoteData_Current\r\n",
+					"ZORDER BY (NoteKey, visitarchiveid, Timestamp)\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"print(\"Table optimized with Z-ORDER.\")"
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
