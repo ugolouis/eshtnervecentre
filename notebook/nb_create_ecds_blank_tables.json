@@ -6,6 +6,10 @@
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -16,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "8a66fc7b-58d6-445d-9cae-368a1ebb2d52"
+				"spark.autotune.trackingId": "4a31c3a1-b039-4901-a607-960050009fcf"
 			}
 		},
 		"metadata": {
@@ -28,6 +32,21 @@
 			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
