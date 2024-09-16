@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "4a31c3a1-b039-4901-a607-960050009fcf"
+				"spark.autotune.trackingId": "0c2e7b23-36ce-4458-a6bb-0dc5bdf344bb"
 			}
 		},
 		"metadata": {
@@ -70,7 +70,7 @@
 					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
 					"from delta.tables import DeltaTable"
 				],
-				"execution_count": null
+				"execution_count": 1
 			},
 			{
 				"cell_type": "markdown",
@@ -132,7 +132,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -182,7 +182,7 @@
 					"    print(f\"Error creating Delta table: {str(e)}\")\r\n",
 					"    # You might want to add additional error handling here, such as logging the error or retrying the operation"
 				],
-				"execution_count": null
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -243,7 +243,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 4
 			},
 			{
 				"cell_type": "markdown",
@@ -310,7 +310,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 5
 			},
 			{
 				"cell_type": "markdown",
@@ -379,7 +379,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "markdown",
@@ -447,7 +447,7 @@
 					"    print(f\"Error creating Delta table: {str(e)}\")\r\n",
 					"    # You might want to add additional error handling here, such as logging the error or retrying the operation"
 				],
-				"execution_count": null
+				"execution_count": 7
 			},
 			{
 				"cell_type": "markdown",
@@ -508,7 +508,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "markdown",
@@ -574,7 +574,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "markdown",
@@ -647,7 +647,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 10
 			},
 			{
 				"cell_type": "markdown",
@@ -715,7 +715,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 11
 			},
 			{
 				"cell_type": "markdown",
@@ -775,7 +775,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 12
 			},
 			{
 				"cell_type": "markdown",
@@ -839,7 +839,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 13
 			},
 			{
 				"cell_type": "markdown",
@@ -903,7 +903,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 14
 			},
 			{
 				"cell_type": "markdown",
@@ -965,7 +965,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 15
 			},
 			{
 				"cell_type": "markdown",
@@ -1029,7 +1029,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 16
 			},
 			{
 				"cell_type": "markdown",
