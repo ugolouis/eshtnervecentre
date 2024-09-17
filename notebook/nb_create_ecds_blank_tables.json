@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "0c2e7b23-36ce-4458-a6bb-0dc5bdf344bb"
+				"spark.autotune.trackingId": "be457f55-df05-4254-bf81-ef8124f9452d"
 			}
 		},
 		"metadata": {
@@ -303,9 +303,6 @@
 					"        print(\"Verified: The table is a valid Delta table.\")\r\n",
 					"    else:\r\n",
 					"        print(\"Warning: The table doesn't seem to be a valid Delta table.\")\r\n",
-					"    \r\n",
-					"    # Note: Primary Key is (visitarchiveid, ObsId, obsdetailsid)\r\n",
-					"    # Delta Lake doesn't support primary key constraints directly, but we can ensure data integrity in our write operations\r\n",
 					"    print(\"Note: Remember to enforce the primary key (visitarchiveid, ObsId, obsdetailsid) in your write operations.\")\r\n",
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
@@ -372,10 +369,6 @@
 					"        print(\"Verified: The table is a valid Delta table.\")\r\n",
 					"    else:\r\n",
 					"        print(\"Warning: The table doesn't seem to be a valid Delta table.\")\r\n",
-					"    \r\n",
-					"    # Note: Primary Key is (visitarchiveid, ObsId, obsdetailsid)\r\n",
-					"    # Delta Lake doesn't support primary key constraints directly, but we can ensure data integrity in our write operations\r\n",
-					"    print(\"Note: Remember to enforce the primary key (visitarchiveid, ObsId, obsdetailsid) in your write operations.\")\r\n",
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
@@ -997,7 +990,7 @@
 					"# Define the schema for the table\r\n",
 					"schema = StructType([\r\n",
 					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
-					"    StructField(\"ProcedureOrder\", LongType(), nullable=True),\r\n",
+					"    StructField(\"ProcedureOrder\", StringType(), nullable=True),\r\n",
 					"    StructField(\"ProcedureDesc\", StringType(), nullable=True),\r\n",
 					"    StructField(\"EC_Procedure_Date_Time\", TimestampType(), nullable=True),\r\n",
 					"    StructField(\"EC_ProcedureCodeSNOMED\", StringType(), nullable=True),\r\n",
@@ -1029,7 +1022,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": 16
+				"execution_count": 17
 			},
 			{
 				"cell_type": "markdown",
@@ -1093,7 +1086,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 18
 			},
 			{
 				"cell_type": "markdown",
@@ -1155,7 +1148,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 19
 			},
 			{
 				"cell_type": "markdown",
@@ -1184,13 +1177,17 @@
 					}
 				},
 				"source": [
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"from pyspark.sql.functions import expr, unix_timestamp\r\n",
+					"from delta.tables import DeltaTable\r\n",
+					"\r\n",
 					"# Define the schema for the table\r\n",
 					"schema = StructType([\r\n",
 					"    StructField(\"LogID\", IntegerType(), nullable=False),\r\n",
 					"    StructField(\"StepDescription\", StringType(), nullable=True),\r\n",
 					"    StructField(\"StepStart\", TimestampType(), nullable=True),\r\n",
 					"    StructField(\"StepFinish\", TimestampType(), nullable=True),\r\n",
-					"    StructField(\"StepDurationSecs\", LongType(), nullable=True)\r\n",
+					"    StructField(\"StepDurationSecs\", StringType(), nullable=True)\r\n",
 					"])\r\n",
 					"\r\n",
 					"# Create an empty DataFrame with the defined schema\r\n",
@@ -1217,7 +1214,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 24
 			},
 			{
 				"cell_type": "markdown",
@@ -1276,7 +1273,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 25
 			},
 			{
 				"cell_type": "markdown",
@@ -1340,7 +1337,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 26
 			},
 			{
 				"cell_type": "markdown",
@@ -1400,7 +1397,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 27
 			},
 			{
 				"cell_type": "markdown",
@@ -1472,7 +1469,7 @@
 					"\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 28
 			},
 			{
 				"cell_type": "markdown",
@@ -1501,6 +1498,12 @@
 					}
 				},
 				"source": [
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"from pyspark.sql.functions import lit, current_timestamp\r\n",
+					"from delta.tables import DeltaTable\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
 					"# Define the schema for the table\r\n",
 					"schema = StructType([\r\n",
 					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
@@ -1612,7 +1615,7 @@
 					"df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
 					"\r\n",
 					"# Define the path for the Delta table\r\n",
-					"delta_table_path = \"abfss://Curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/ECDS/ECDS_EmergencyVisitData_Main\"\r\n",
+					"delta_table_path = \"curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_EmergencyVisitData_Main\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table with error handling\r\n",
 					"try:\r\n",
@@ -1649,7 +1652,7 @@
 					"\r\n",
 					"print(\"Process completed.\")"
 				],
-				"execution_count": null
+				"execution_count": 31
 			},
 			{
 				"cell_type": "markdown",
@@ -1725,7 +1728,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table or setting constraints: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 32
 			},
 			{
 				"cell_type": "markdown",
@@ -1814,7 +1817,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table or setting constraints: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 38
 			},
 			{
 				"cell_type": "markdown",
@@ -1890,7 +1893,7 @@
 					"except Exception as e:\r\n",
 					"    print(f\"Error creating Delta table or setting constraints: {str(e)}\")"
 				],
-				"execution_count": null
+				"execution_count": 39
 			}
 		]
 	}
