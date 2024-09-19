@@ -16,7 +16,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "b5fcd8e8-4f8d-482b-a375-96939505cbc9"
+				"spark.autotune.trackingId": "a5b9e373-c3b2-434d-8e86-5702bec1fc31"
 			}
 		},
 		"metadata": {
@@ -301,6 +301,104 @@
 					"# Create Delta table in the metastore\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientVisitHistoryData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table StoredProc_Log"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"ID\", LongType(), nullable=False),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"SP_Name\", StringType(), nullable=False),\r\n",
+					"    StructField(\"MessageText\", StringType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/StoredProc_Log\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table in the metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS StoredProc_Log USING DELTA LOCATION '{delta_table_path}'\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table VisitArchiveID_delta"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType, StructField, IntegerType, TimestampType\r\n",
+					"\r\n",
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/VisitArchiveID_delta\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table in the metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS VisitArchiveID_delta USING DELTA LOCATION '{delta_table_path}'\")"
 				],
 				"execution_count": null
 			}
