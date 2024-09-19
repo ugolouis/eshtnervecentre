@@ -1,0 +1,309 @@
+{
+	"name": "nb_create_spb_blank_tables",
+	"properties": {
+		"folder": {
+			"name": "nb_create_blank_tables"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "b5fcd8e8-4f8d-482b-a375-96939505cbc9"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"# Import needed functions\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, ShortType\r\n",
+					"from pyspark.sql.functions import current_timestamp"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ClinicalNoteData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ClinicalNoteData_First"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table in the Hive metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table PatientData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"patientname\", StringType(), nullable=True),\r\n",
+					"    StructField(\"dob\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"hospnumber1\", StringType(), nullable=True),\r\n",
+					"    StructField(\"hospnumber2\", StringType(), nullable=True),\r\n",
+					"    StructField(\"altnumber\", StringType(), nullable=True),\r\n",
+					"    StructField(\"natlnumber\", StringType(), nullable=True),\r\n",
+					"    StructField(\"deceased\", ShortType(), nullable=True),\r\n",
+					"    StructField(\"male\", ShortType(), nullable=True),\r\n",
+					"    StructField(\"title\", StringType(), nullable=True),\r\n",
+					"    StructField(\"maritalstatus\", StringType(), nullable=True),\r\n",
+					"    StructField(\"religion\", StringType(), nullable=True),\r\n",
+					"    StructField(\"ethnicity\", StringType(), nullable=True),\r\n",
+					"    StructField(\"nationality\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressStreet\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressArea\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressCity\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressCounty\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressPostCode\", StringType(), nullable=True),\r\n",
+					"    StructField(\"addressCountry\", StringType(), nullable=True),\r\n",
+					"    StructField(\"preferredTelephone\", StringType(), nullable=True),\r\n",
+					"    StructField(\"dateTimeOfDeath\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"lastName\", StringType(), nullable=True),\r\n",
+					"    StructField(\"firstName\", StringType(), nullable=True),\r\n",
+					"    StructField(\"middleName\", StringType(), nullable=True),\r\n",
+					"    StructField(\"gender\", StringType(), nullable=True),\r\n",
+					"    StructField(\"gpPracticeID\", StringType(), nullable=True),\r\n",
+					"    StructField(\"unknownpatient\", ShortType(), nullable=True),\r\n",
+					"    StructField(\"recordlastupdated\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/PatientData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table in the metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table PatientVisitHistoryData_Current"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"eventTime\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"patientid\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"ward\", StringType(), nullable=True),\r\n",
+					"    StructField(\"area\", StringType(), nullable=True),\r\n",
+					"    StructField(\"bed\", StringType(), nullable=True),\r\n",
+					"    StructField(\"consultant\", StringType(), nullable=True),\r\n",
+					"    StructField(\"speciality\", StringType(), nullable=True),\r\n",
+					"    StructField(\"visitid\", StringType(), nullable=True),\r\n",
+					"    StructField(\"mergedfrompatientid\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"recordedTime\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"eventType\", StringType(), nullable=True),\r\n",
+					"    StructField(\"replacedBy\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"timeto\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"source\", StringType(), nullable=True),\r\n",
+					"    StructField(\"RecordLastUpdated\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/PatientVisitHistoryData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table in the metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientVisitHistoryData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

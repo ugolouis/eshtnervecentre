@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "46c1983c-9813-4711-b49f-c05050c813b8"
+				"spark.autotune.trackingId": "e25a19d3-bb7c-41f7-86af-466d3f26e6a4"
 			}
 		},
 		"metadata": {
@@ -119,6 +119,66 @@
 					"print(\"Table optimized with Z-ORDER.\")"
 				],
 				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType\r\n",
+					"\r\n",
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"NCDBEXID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Id\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"VisitId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"Location\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PatientId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"HN\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"NoteValue\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NoteValShort\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EpisodeId\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"NoteVal_LocalDateTime\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
+					"\r\n",
+					"# Create Delta table\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
+					"\r\n",
+					"print(\"Delta table ClinicalNoteData_Current created successfully.\")\r\n",
+					"\r\n",
+					"# Since OPTIMIZE and ZORDER are not supported, consider repartitioning and sorting the data instead\r\n",
+					"# When writing data, repartition and sort the DataFrame\r\n",
+					"# Example:\r\n",
+					"# df = df.repartition(\"NoteKey\", \"visitarchiveid\", \"Timestamp\")\r\n",
+					"# df = df.sortWithinPartitions(\"NoteKey\", \"visitarchiveid\", \"Timestamp\")\r\n",
+					"# df.write.format(\"delta\").mode(\"append\").save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Data repartitioned and sorted within partitions.\")\r\n",
+					""
+				],
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
