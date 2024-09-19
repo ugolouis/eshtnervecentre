@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "7ed7d79e-d985-4da8-bbdd-97c2c81ddaf6"
+				"spark.autotune.trackingId": "1a46fce8-235e-4cde-add7-4715f91e1263"
 			}
 		},
 		"metadata": {
@@ -168,16 +168,16 @@
 					"# Create an empty DataFrame with the defined schema\r\n",
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
-					"# Define the path for the Delta table\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_First\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table to initialize it\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
 					"\r\n",
-					"# Create Delta table in the Hive metastore\r\n",
-					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")"
+					"# Create Delta table in the metastore\r\n",
+					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_First USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": 10
+				"execution_count": 16
 			},
 			{
 				"cell_type": "markdown",
