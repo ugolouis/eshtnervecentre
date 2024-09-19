@@ -6,6 +6,10 @@
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -16,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "a5b9e373-c3b2-434d-8e86-5702bec1fc31"
+				"spark.autotune.trackingId": "7ed7d79e-d985-4da8-bbdd-97c2c81ddaf6"
 			}
 		},
 		"metadata": {
@@ -24,10 +28,25 @@
 			"enableDebugMode": false,
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "python"
+				"display_name": "Synapse PySpark"
 			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -36,10 +55,10 @@
 				"cell_type": "code",
 				"source": [
 					"# Import needed functions\r\n",
-					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, ShortType\r\n",
+					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, ShortType, LongType\r\n",
 					"from pyspark.sql.functions import current_timestamp"
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "markdown",
@@ -99,7 +118,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "markdown",
@@ -158,7 +177,7 @@
 					"# Create Delta table in the Hive metastore\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNoteData_Current USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 10
 			},
 			{
 				"cell_type": "markdown",
@@ -235,7 +254,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 11
 			},
 			{
 				"cell_type": "markdown",
@@ -302,7 +321,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS PatientVisitHistoryData_Current USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 12
 			},
 			{
 				"cell_type": "markdown",
@@ -351,7 +370,7 @@
 					"# Create Delta table in the metastore\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS StoredProc_Log USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 13
 			},
 			{
 				"cell_type": "markdown",
@@ -400,7 +419,7 @@
 					"# Create Delta table in the metastore\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS VisitArchiveID_delta USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 14
 			}
 		]
 	}
