@@ -1,5 +1,5 @@
 {
-	"name": "nb_create_reporting_blank_table",
+	"name": "nb_create_reporting_blank_tables",
 	"properties": {
 		"folder": {
 			"name": "nb_create_blank_tables"
@@ -45,8 +45,7 @@
 				"sparkVersion": "3.4",
 				"nodeCount": 10,
 				"cores": 4,
-				"memory": 28,
-				"automaticScaleJobs": false
+				"memory": 28
 			},
 			"sessionKeepAliveTimeout": 30
 		},
