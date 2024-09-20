@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "b7f30f2f-5b74-4683-875f-d34b9ed0b170"
+				"spark.autotune.trackingId": "1bd789a8-40d6-4ac5-a06a-9be016689c64"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"# import needed function\r\n",
 					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType, TimestampType, BooleanType"
 				],
-				"execution_count": 8
+				"execution_count": 10
 			},
 			{
 				"cell_type": "markdown",
