@@ -1,0 +1,255 @@
+{
+	"name": "nb_create_ref_blank_table",
+	"properties": {
+		"folder": {
+			"name": "nb_create_blank_tables"
+		},
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "esht",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "4f022c96-3268-410c-a29b-39285f0b410b"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/528d7df3-243d-4d06-8d47-82c561237d91/resourceGroups/esht-project-rg/providers/Microsoft.Synapse/workspaces/louisworkspace/bigDataPools/esht",
+				"name": "esht",
+				"type": "Spark",
+				"endpoint": "https://louisworkspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/esht",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# import needed function\r\n",
+					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType, TimestampType, BooleanType"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_SensitiveCodesSNOMED"
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"snomed\", StringType(), nullable=False),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/REF/ECDS_SensitiveCodesSNOMED\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Delta table ECDS_SensitiveCodesSNOMED created successfully.\")\r\n",
+					"\r\n",
+					"# Register the table in the metastore with a comment\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"CREATE TABLE IF NOT EXISTS ECDS_SensitiveCodesSNOMED\r\n",
+					"USING DELTA\r\n",
+					"LOCATION '{delta_table_path}'\r\n",
+					"COMMENT 'https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\r\n",
+					"\"\"\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table RefNC_ClinicalNoteTypes"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"NoteKey\", StringType(), nullable=False),\r\n",
+					"    StructField(\"DataRows\", IntegerType(), nullable=True),\r\n",
+					"    StructField(\"Length_Min\", LongType(), nullable=True),\r\n",
+					"    StructField(\"Length_Max\", LongType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp_Min\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"Timestamp_Max\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"CensusDate\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"ECDS_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"CISD_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"BI_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"Usage_Notes\", StringType(), nullable=True),\r\n",
+					"    StructField(\"eSearcher_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"OCC_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"LiveFlow_Use\", BooleanType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/REF/RefNC_ClinicalNoteTypes\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Delta table RefNC_ClinicalNoteTypes created successfully.\")\r\n",
+					"\r\n",
+					"# Register the table in the metastore with a comment (if needed)\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"CREATE TABLE IF NOT EXISTS RefNC_ClinicalNoteTypes\r\n",
+					"USING DELTA\r\n",
+					"LOCATION '{delta_table_path}'\r\n",
+					"\"\"\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table refNC_eventType"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"NCCode\", StringType(), nullable=True),\r\n",
+					"    StructField(\"NCDescription\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/REF/refNC_eventType\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table to initialize it\r\n",
+					"df.write.format(\"delta\").mode(\"overwrite\").save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Delta table refNC_eventType created successfully.\")\r\n",
+					"\r\n",
+					"# Register the table in the metastore with a comment (if needed)\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"CREATE TABLE IF NOT EXISTS refNC_eventType\r\n",
+					"USING DELTA\r\n",
+					"LOCATION '{delta_table_path}'\r\n",
+					"COMMENT 'Reference table for NC event types'\r\n",
+					"\"\"\")"
+				],
+				"execution_count": null
+			}
+		]
+	}
+}
