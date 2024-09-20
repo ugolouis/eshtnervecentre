@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "1bd789a8-40d6-4ac5-a06a-9be016689c64"
+				"spark.autotune.trackingId": "eb3e7ddd-e5c3-4341-9799-e267757ca907"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"# import needed function\r\n",
 					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType, TimestampType, BooleanType"
 				],
-				"execution_count": 10
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -112,7 +112,7 @@
 					"COMMENT 'https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\r\n",
 					"\"\"\")"
 				],
-				"execution_count": null
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -179,7 +179,7 @@
 					"LOCATION '{delta_table_path}'\r\n",
 					"\"\"\")"
 				],
-				"execution_count": null
+				"execution_count": 4
 			},
 			{
 				"cell_type": "markdown",
@@ -235,7 +235,7 @@
 					"COMMENT 'Reference table for NC event types'\r\n",
 					"\"\"\")"
 				],
-				"execution_count": null
+				"execution_count": 5
 			}
 		]
 	}
