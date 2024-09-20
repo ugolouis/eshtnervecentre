@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "27192474-2ab0-4e9f-a087-86d6f7c49637"
+				"spark.autotune.trackingId": "5f3fc90d-3a5a-469c-b68f-bf064de374f6"
 			}
 		},
 		"metadata": {
@@ -68,7 +68,7 @@
 					"# Import needed functions\r\n",
 					"from pyspark.sql.types import StructType, StructField, LongType, StringType, IntegerType, TimestampType, BooleanType"
 				],
-				"execution_count": null
+				"execution_count": 17
 			},
 			{
 				"cell_type": "markdown",
@@ -116,7 +116,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNotes_CommPathwayDest_History USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 18
 			},
 			{
 				"cell_type": "markdown",
@@ -175,7 +175,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNotes_CTR_History USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 19
 			},
 			{
 				"cell_type": "markdown",
@@ -234,7 +234,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNotes_DelayReason_History USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 20
 			},
 			{
 				"cell_type": "markdown",
@@ -292,7 +292,7 @@
 					"# Register the table in the metastore if needed\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNotes_DelayReason_HUB_History USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 21
 			},
 			{
 				"cell_type": "markdown",
@@ -350,7 +350,7 @@
 					"# Register the table in the metastore if needed\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS ClinicalNotes_DischPathway_History USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 22
 			},
 			{
 				"cell_type": "markdown",
@@ -435,7 +435,7 @@
 					"# Register the table in the metastore if needed\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS CTR_IP_Bedstate USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 23
 			},
 			{
 				"cell_type": "markdown",
@@ -471,7 +471,7 @@
 					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
 					"    StructField(\"PasNo\", StringType(), nullable=True),\r\n",
 					"    StructField(\"natlnumber\", StringType(), nullable=True),\r\n",
-					"    StructField(\"Practice(Now)\", StringType(), nullable=True),\r\n",
+					"    StructField(\"PracticeNow\", StringType(), nullable=True),\r\n",
 					"    StructField(\"DischargeDateTime\", TimestampType(), nullable=False),\r\n",
 					"    StructField(\"DischStatusName\", StringType(), nullable=True),\r\n",
 					"    StructField(\"DepartDest\", StringType(), nullable=True),\r\n",
@@ -506,7 +506,7 @@
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS NerveCentreToDocman_Fails USING DELTA LOCATION '{delta_table_path}'\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 27
 			},
 			{
 				"cell_type": "markdown",
@@ -566,7 +566,7 @@
 					"# Register the table in the metastore if needed\r\n",
 					"spark.sql(f\"CREATE TABLE IF NOT EXISTS SSRS_Data_Subscriptions USING DELTA LOCATION '{delta_table_path}'\")"
 				],
-				"execution_count": null
+				"execution_count": 25
 			}
 		]
 	}
