@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "4f022c96-3268-410c-a29b-39285f0b410b"
+				"spark.autotune.trackingId": "b7f30f2f-5b74-4683-875f-d34b9ed0b170"
 			}
 		},
 		"metadata": {
@@ -52,19 +52,6 @@
 		},
 		"cells": [
 			{
-				"cell_type": "markdown",
-				"metadata": {
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					}
-				},
-				"source": [
-					""
-				]
-			},
-			{
 				"cell_type": "code",
 				"metadata": {
 					"jupyter": {
@@ -81,7 +68,7 @@
 					"# import needed function\r\n",
 					"from pyspark.sql.types import StructType, StructField, StringType, IntegerType, LongType, TimestampType, BooleanType"
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "markdown",
