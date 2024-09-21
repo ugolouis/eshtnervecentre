@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "4d5609de-b070-4597-8e31-bd2e05742e9a"
+				"spark.autotune.trackingId": "2e246071-806e-4830-8870-50bba81b3508"
 			}
 		},
 		"metadata": {
@@ -533,6 +533,280 @@
 					"\"\"\")\r\n",
 					"\r\n",
 					"#print(\"Table ECDS_Comorbidity has been registered to the metastore.\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### create ECDS_Diagnosis table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"DiagnosiosisDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"EC_Diagnosis_CodeSNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"Coded_Clinical_Entry_Seq_Num\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"EC_Diagnosis_QualifierSNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"DiagnosisQualifierDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"EC_Diagnosis_LataralitySNOMED\", StringType(), nullable=True),\r\n",
+					"    StructField(\"DiagnosisLataralityDesc\", StringType(), nullable=True),\r\n",
+					"    StructField(\"DiagnosisComment\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Diagnosis\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table without error handling\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"print(\"Delta table ECDS_Diagnosis created successfully.\")\r\n",
+					"\r\n",
+					"# Register the Delta table to the metastore\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_Diagnosis\r\n",
+					"    USING DELTA \r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"print(\"Table ECDS_Diagnosis has been registered to the metastore.\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### create ECDS_Diagnosis_xTab table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the initial schema fields\r\n",
+					"schema_fields = [\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False)\r\n",
+					"]\r\n",
+					"\r\n",
+					"# Dynamically create fields for diagnoses 1-10\r\n",
+					"for i in range(1, 11):\r\n",
+					"    schema_fields.extend([\r\n",
+					"        StructField(f\"Diagnosiosis{i}Desc\", StringType(), nullable=True),\r\n",
+					"        StructField(f\"EC_Diagnosis_Code{i}SNOMED\", StringType(), nullable=True),\r\n",
+					"        StructField(f\"DiagnosisQualifier{i}Desc\", StringType(), nullable=True),\r\n",
+					"        StructField(f\"EC_Diagnosis_Qualifier{i}SNOMED\", StringType(), nullable=True),\r\n",
+					"        StructField(f\"DiagnosisLatarality{i}Desc\", StringType(), nullable=True),\r\n",
+					"        StructField(f\"EC_Diagnosis_Latarality{i}SNOMED\", StringType(), nullable=True)\r\n",
+					"    ])\r\n",
+					"\r\n",
+					"# Add InsertedOn field\r\n",
+					"schema_fields.append(StructField(\"InsertedOn\", TimestampType(), nullable=True))\r\n",
+					"\r\n",
+					"# Create the schema\r\n",
+					"schema = StructType(schema_fields)\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Diagnosis_xTab\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table without error handling\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDS_Diagnosis_xTab created successfully.\")\r\n",
+					"\r\n",
+					"# Register the Delta table to the metastore\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_Diagnosis_xTab\r\n",
+					"    USING DELTA \r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDS_Diagnosis_xTab has been registered to the metastore.\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### create ECDS/ECDS_EMED3_Fit_Note table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Assess_Date\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"Condition\", StringType(), nullable=True),\r\n",
+					"    StructField(\"Diagnosis\", StringType(), nullable=True),\r\n",
+					"    StructField(\"Start_Date\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"End_Date\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"Duration\", StringType(), nullable=True),\r\n",
+					"    StructField(\"Recorded_Date\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"Follow_Up_Ind\", StringType(), nullable=True),\r\n",
+					"    StructField(\"Note_Issuer\", StringType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"AmendOn\", TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_EMED3_Fit_Note\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table without error handling\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDS_EMED3_Fit_Note created successfully.\")\r\n",
+					"\r\n",
+					"# Register the Delta table to the metastore\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_EMED3_Fit_Note\r\n",
+					"    USING DELTA \r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDS_EMED3_Fit_Note has been registered to the metastore.\")\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### create CDS_ExpectedDateTimeOfTreatment table"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Emergency_Care_Expected_Timestamp\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"Emergency_Care_Treatment_Timestamp\", TimestampType(), nullable=True),\r\n",
+					"    StructField(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"    # Note: If you have an 'AmendOn' field, consider adding it here for consistency.\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_ExpectedDateTimeOfTreatment\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table without error handling\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDS_ExpectedDateTimeOfTreatment created successfully.\")\r\n",
+					"\r\n",
+					"# Register the Delta table to the metastore\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_ExpectedDateTimeOfTreatment \r\n",
+					"    USING DELTA \r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDS_ExpectedDateTimeOfTreatment has been registered to the metastore.\")\r\n",
 					""
 				],
 				"execution_count": null
