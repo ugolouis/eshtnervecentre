@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "663dda5a-384f-4eae-af23-4328e3c17287"
+				"spark.autotune.trackingId": "e942aacd-62a5-4734-8022-67e0d4affb7e"
 			}
 		},
 		"metadata": {
@@ -69,7 +69,7 @@
 				"cell_type": "code",
 				"source": [
 					"# import needed pyspark functions\r\n",
-					"from pyspark.sql.functions import current_timestamp, expr, unix_timestamp\r\n",
+					"from pyspark.sql.functions import current_timestamp, expr, unix_timestamp, lit\r\n",
 					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType, TimestampType, LongType, ShortType, BooleanType\r\n",
 					"from delta.tables import DeltaTable\r\n",
 					"from pyspark.sql import SparkSession"
@@ -1674,6 +1674,239 @@
 					"\"\"\")\r\n",
 					"\r\n",
 					"#print(\"Table ECDS_EmergencyVisitData_Main_tbl has been registered to the metastore with comment.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_Investigations_xTab"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table, including 'Sensitive_Flag' and 'AmendedOn' for consistency\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Add fields for each of the 30 investigation codes\r\n",
+					"for i in range(1, 31):\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}SNOMED\", StringType(), True)\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}CDS\", StringType(), True)\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}Date\", TimestampType(), True)\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}Desc\", StringType(), True)\r\n",
+					"\r\n",
+					"# Add InsertedOn, Sensitive_Flag, and AmendedOn fields\r\n",
+					"schema.add(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"schema.add(\"Sensitive_Flag\", StringType(), nullable=False)\r\n",
+					"schema.add(\"AmendedOn\", TimestampType(), nullable=True)\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table with the correct protocol (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Investigations_xTab\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDS_Investigations_xTab created successfully.\")\r\n",
+					"\r\n",
+					"# Add table description as a comment\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_Investigations_xTab\r\n",
+					"    USING DELTA\r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"    COMMENT 'https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDS_Investigations_xTab has been registered to the metastore with comment.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDSGrouperInput"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table, including 'AmendedOn' for consistency\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Er_Visit_ID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"PatID\", StringType(), True),\r\n",
+					"    StructField(\"Site_Code_Of_Treatment\", StringType(), True),\r\n",
+					"    StructField(\"Arrival_Date_Time\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EC_Attendance_Conclusion_Date_Time\", TimestampType(), True),\r\n",
+					"    StructField(\"EmergencyCareDepartmentType\", StringType(), True),\r\n",
+					"    StructField(\"PatientAge\", IntegerType(), True),\r\n",
+					"    StructField(\"PatientGroup\", StringType(), True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Add fields for each of the 30 investigation codes\r\n",
+					"for i in range(1, 31):\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}CDS\", StringType(), True)\r\n",
+					"\r\n",
+					"# Add fields for each of the 30 procedure codes\r\n",
+					"for i in range(1, 31):\r\n",
+					"    schema.add(f\"ProcCode{i}CDS\", StringType(), True)\r\n",
+					"\r\n",
+					"# Add remaining fields\r\n",
+					"schema.add(\"Streamed_Flag\", StringType(), True)\r\n",
+					"schema.add(\"Sensitive_Flag\", StringType(), True)\r\n",
+					"schema.add(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"schema.add(\"AmendedOn\", TimestampType(), nullable=True)  # Added for consistency\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDSGrouperInput\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDSGrouperInput created successfully.\")\r\n",
+					"\r\n",
+					"# Add table description as a comment\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDSGrouperInput\r\n",
+					"    USING DELTA\r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"    COMMENT 'Reference: https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDSGrouperInput has been registered to the metastore with comment.\")"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"### Create table ECDS_Procedures_xTab"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Define the schema for the table, including 'AmendedOn' for consistency\r\n",
+					"schema = StructType([\r\n",
+					"    StructField(\"visitarchiveid\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"Er_Visit_ID\", IntegerType(), nullable=False),\r\n",
+					"    StructField(\"PatID\", StringType(), True),\r\n",
+					"    StructField(\"Site_Code_Of_Treatment\", StringType(), True),\r\n",
+					"    StructField(\"Arrival_Date_Time\", TimestampType(), nullable=False),\r\n",
+					"    StructField(\"EC_Attendance_Conclusion_Date_Time\", TimestampType(), True),\r\n",
+					"    StructField(\"EmergencyCareDepartmentType\", StringType(), True),\r\n",
+					"    StructField(\"PatientAge\", IntegerType(), True),\r\n",
+					"    StructField(\"PatientGroup\", StringType(), True)\r\n",
+					"])\r\n",
+					"\r\n",
+					"# Add fields for each of the 30 investigation codes\r\n",
+					"for i in range(1, 31):\r\n",
+					"    schema.add(f\"EC_InvestigationCode{i}CDS\", StringType(), True)\r\n",
+					"\r\n",
+					"# Add fields for each of the 30 procedure codes\r\n",
+					"for i in range(1, 31):\r\n",
+					"    schema.add(f\"ProcCode{i}CDS\", StringType(), True)\r\n",
+					"    schema.add(f\"ProcCode{i}SNOMED\", StringType(), True)\r\n",
+					"    schema.add(f\"ProcCode{i}Date\", TimestampType(), True)\r\n",
+					"    schema.add(f\"ProcCode{i}Desc\", StringType(), True)\r\n",
+					"\r\n",
+					"# Add remaining fields\r\n",
+					"schema.add(\"Streamed_Flag\", StringType(), True)\r\n",
+					"schema.add(\"Sensitive_Flag\", StringType(), True)\r\n",
+					"schema.add(\"InsertedOn\", TimestampType(), nullable=False)\r\n",
+					"schema.add(\"AmendedOn\", TimestampType(), nullable=True)  # Added for consistency\r\n",
+					"\r\n",
+					"# Create an empty DataFrame with the defined schema\r\n",
+					"df = spark.createDataFrame([], schema)\r\n",
+					"\r\n",
+					"# Define the path for the Delta table (ensure correct casing)\r\n",
+					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/ECDS/ECDS_Procedures_xTab\"\r\n",
+					"\r\n",
+					"# Write the DataFrame as a Delta table\r\n",
+					"df.write.format(\"delta\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
+					"    .save(delta_table_path)\r\n",
+					"\r\n",
+					"#print(\"Delta table ECDS_Procedures_xTab created successfully.\")\r\n",
+					"\r\n",
+					"# Add table description as a comment\r\n",
+					"spark.sql(f\"\"\"\r\n",
+					"    CREATE TABLE IF NOT EXISTS ECDS_Procedures_xTab\r\n",
+					"    USING DELTA\r\n",
+					"    LOCATION '{delta_table_path}'\r\n",
+					"    COMMENT 'Reference: https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx'\r\n",
+					"\"\"\")\r\n",
+					"\r\n",
+					"#print(\"Table ECDS_Procedures_xTab has been registered to the metastore with comment.\")"
 				],
 				"execution_count": null
 			}
