@@ -1,8 +1,8 @@
 {
-	"name": "nb_create_ecds_blank_tables_prod",
+	"name": "nb_create_ecds_blank_tables_dev",
 	"properties": {
 		"folder": {
-			"name": "nb_create_blank_tables_prod"
+			"name": "nb_create_blank_tables_dev"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "e942aacd-62a5-4734-8022-67e0d4affb7e"
+				"spark.autotune.trackingId": "90f009c8-06db-4c5c-874c-5fa0019cae72"
 			}
 		},
 		"metadata": {
@@ -51,6 +51,115 @@
 			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# ECDS Delta Tables Creation Notebook\r\n",
+					"\r\n",
+					"## Overview\r\n",
+					"\r\n",
+					"This notebook creates multiple **Delta tables** within the **ESHT/ECDS** data lake using Microsoft Synapse Analytics. Each cell corresponds to a specific table setup with predefined schemas.\r\n",
+					"\r\n",
+					"## Tables Created\r\n",
+					"\r\n",
+					"1. **ECDS_UpdateErrorText**\r\n",
+					"2. **ECDStoCDS_MappingCodes**\r\n",
+					"3. **ECDStoCDS_MappingSubTypes**\r\n",
+					"4. **refECDS_SensitiveCodesSNOMED**\r\n",
+					"5. **ECDS_EmergencyVisitData_Main**\r\n",
+					"6. **ECDS_Investigations_xTab**\r\n",
+					"7. **ECDS_Procedures_xTab**\r\n",
+					"8. **ECDSGrouperInput**\r\n",
+					"9. **ECDS_StoredProc_Log**\r\n",
+					"10. **ECDS_SafeguardingConcern**\r\n",
+					"11. **ECDS_ReferralsToOtherServices**\r\n",
+					"12. **ECDS_Procedure**\r\n",
+					"13. **ECDS_Personal_Circumstances**\r\n",
+					"14. **ECDS_MentalHealthActLegalStatus**\r\n",
+					"15. **ECDS_Investigations**\r\n",
+					"16. **CDS_ExpectedDateTimeOfTreatment**\r\n",
+					"17. **ECDS_EMED3_Fit_Note**\r\n",
+					"18. **ECDS_Diagnosis_xTab**\r\n",
+					"19. **ECDS_Diagnosis**\r\n",
+					"20. **ECDS_Comorbidity**\r\n",
+					"21. **ECDS_CodedScoredAssessment**\r\n",
+					"22. **ECDS_CodedClinicalObservations**\r\n",
+					"23. **ECDS_CodedClinicalFindings**\r\n",
+					"24. **ECDS_AttendanceOccurrence**\r\n",
+					"25. **ECDS_AlcoholDrug**\r\n",
+					"26. **ECDS_Accomodation_Type**\r\n",
+					"\r\n",
+					"Each table is structured to meet specific data requirements, ensuring consistency and efficiency across the ECDS data ecosystem.\r\n",
+					"\r\n",
+					"## Setting Default Values During Data Ingestion\r\n",
+					"\r\n",
+					"Default values are set using `df.withColumn`. It's recommended to implement these defaults **during data ingestion** to ensure consistency and reduce post-processing steps.\r\n",
+					"\r\n",
+					"**Guidance:**\r\n",
+					"\r\n",
+					"- **Integrate in ETL Pipelines:**\r\n",
+					"  Incorporate `withColumn` transformations within your ETL processes.\r\n",
+					"  ```python\r\n",
+					"  df = df.withColumn(\"Sensitive_Flag\", lit(\"N\"))\r\n",
+					"  df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"\r\n",
+					"## Primary keys and constraints in Delta tables\r\n",
+					"\r\n",
+					"Delta Lake does not support enforcing unique constraints or primary keys natively.\r\n",
+					"To emulate primary key behavior, you need to handle duplicates during data ingestion \r\n",
+					"\r\n",
+					"**Guidance:**\r\n",
+					"- **Implement data validation and data duplication checks in your data pipelines to ensure data integrity**\r\n",
+					"```python\r\n",
+					"df = df.filter(col(\"visitarchiveid\").isNotNull())\r\n",
+					"df = df.dropDuplicates([\"visitarchiveid\"])\r\n",
+					"```"
+				]
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Initialise Spark session if it does not exist"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# initialise Spark session if it does not exist\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"\r\n",
+					"# Check if a Spark session already exists\r\n",
+					"spark = SparkSession.getActiveSession()\r\n",
+					"if spark is None:\r\n",
+					"    spark = SparkSession.builder.getOrCreate()"
+				],
+				"execution_count": null
+			},
 			{
 				"cell_type": "markdown",
 				"metadata": {
