@@ -2,7 +2,7 @@
 	"name": "nb_create_ref_blank_tables",
 	"properties": {
 		"folder": {
-			"name": "nb_create_blank_tables"
+			"name": "nb_create_blank_tables_test"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "55854edd-ed6f-4efe-bb64-ac3dd927fe95"
+				"spark.autotune.trackingId": "c5b1305f-2321-4fde-8249-ffeccb8d578d"
 			}
 		},
 		"metadata": {

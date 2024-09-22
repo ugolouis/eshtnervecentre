@@ -2,7 +2,7 @@
 	"name": "nb_create_reporting_blank_tables",
 	"properties": {
 		"folder": {
-			"name": "nb_create_blank_tables"
+			"name": "nb_create_blank_tables_test"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,

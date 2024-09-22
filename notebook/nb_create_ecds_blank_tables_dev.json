@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "90f009c8-06db-4c5c-874c-5fa0019cae72"
+				"spark.autotune.trackingId": "655bf37e-4b5b-4bc9-b8e0-be0ef19dbd3e"
 			}
 		},
 		"metadata": {
@@ -107,8 +107,11 @@
 					"- **Integrate in ETL Pipelines:**\r\n",
 					"  Incorporate `withColumn` transformations within your ETL processes.\r\n",
 					"  ```python\r\n",
-					"  df = df.withColumn(\"Sensitive_Flag\", lit(\"N\"))\r\n",
-					"  df = df.withColumn(\"InsertedOn\", current_timestamp())\r\n",
+					"  df = df.withColumn(\"InsertedOn\", current_timestamp()) - all the tables\r\n",
+					"  df = df.withColumn(\"Sensitive_Flag\", lit(\"N\")) - ECDS_EmergencyVisitData_Main and ECDSGrouperInput\r\n",
+					"  df = df.withColumn(\"EmergencyCareDepartmentType\", lit(\"1\")) - ECDSGrouperInput \r\n",
+					"  df = df.withColumn(\"StepDurationSecs\", \r\n",
+					"                   expr(\"cast(unix_timestamp(StepFinish) - unix_timestamp(StepStart) as long)\"))\r\n",
 					"\r\n",
 					"## Primary keys and constraints in Delta tables\r\n",
 					"\r\n",
@@ -158,7 +161,7 @@
 					"if spark is None:\r\n",
 					"    spark = SparkSession.builder.getOrCreate()"
 				],
-				"execution_count": null
+				"execution_count": 1
 			},
 			{
 				"cell_type": "markdown",
@@ -183,7 +186,7 @@
 					"from delta.tables import DeltaTable\r\n",
 					"from pyspark.sql import SparkSession"
 				],
-				"execution_count": 3
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -253,7 +256,7 @@
 					"#print(\"Table LiveAE_Attends has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": 5
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -315,7 +318,7 @@
 					"#print(\"Table ECDS_AlcoholDrug has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": 6
+				"execution_count": 4
 			},
 			{
 				"cell_type": "markdown",
@@ -378,7 +381,7 @@
 					"#print(\"Table ECDS_AttendanceOccurrence has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 5
 			},
 			{
 				"cell_type": "markdown",
@@ -445,7 +448,7 @@
 					"# Note: Remember to enforce the primary key (visitarchiveid, ObsId, obsdetailsid) in your write operations.\r\n",
 					""
 				],
-				"execution_count": 8
+				"execution_count": 6
 			},
 			{
 				"cell_type": "markdown",
@@ -514,7 +517,7 @@
 					"# Note: Remember to enforce the primary key (visitarchiveid, ObsId, obsdetailsid) in your write operations.\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 7
 			},
 			{
 				"cell_type": "markdown",
@@ -581,7 +584,7 @@
 					"# Note: Remember to enforce the primary key (visitarchiveid, ObsId) in your write operations.\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "markdown",
@@ -644,7 +647,7 @@
 					"#print(\"Table ECDS_Comorbidity has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "markdown",
@@ -700,7 +703,7 @@
 					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
 					"    .save(delta_table_path)\r\n",
 					"\r\n",
-					"print(\"Delta table ECDS_Diagnosis created successfully.\")\r\n",
+					"#print(\"Delta table ECDS_Diagnosis created successfully.\")\r\n",
 					"\r\n",
 					"# Register the Delta table to the metastore\r\n",
 					"spark.sql(f\"\"\"\r\n",
@@ -709,10 +712,10 @@
 					"    LOCATION '{delta_table_path}'\r\n",
 					"\"\"\")\r\n",
 					"\r\n",
-					"print(\"Table ECDS_Diagnosis has been registered to the metastore.\")\r\n",
+					"#print(\"Table ECDS_Diagnosis has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 10
 			},
 			{
 				"cell_type": "markdown",
@@ -787,7 +790,7 @@
 					"#print(\"Table ECDS_Diagnosis_xTab has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 11
 			},
 			{
 				"cell_type": "markdown",
@@ -856,7 +859,7 @@
 					"#print(\"Table ECDS_EMED3_Fit_Note has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 12
 			},
 			{
 				"cell_type": "markdown",
@@ -918,7 +921,7 @@
 					"#print(\"Table ECDS_ExpectedDateTimeOfTreatment has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 13
 			},
 			{
 				"cell_type": "markdown",
@@ -983,7 +986,7 @@
 					"#print(\"Table ECDS_Investigations has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 14
 			},
 			{
 				"cell_type": "markdown",
@@ -1048,7 +1051,7 @@
 					"#print(\"Table ECDS_MentalHealthActLegalStatus has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 15
 			},
 			{
 				"cell_type": "markdown",
@@ -1099,7 +1102,7 @@
 					"    .option(\"overwriteSchema\", \"true\") \\\r\n",
 					"    .save(delta_table_path)\r\n",
 					"\r\n",
-					"print(\"Delta table ECDS_Personal_Circumstances created successfully.\")\r\n",
+					"#print(\"Delta table ECDS_Personal_Circumstances created successfully.\")\r\n",
 					"\r\n",
 					"# Register the Delta table to the metastore\r\n",
 					"spark.sql(f\"\"\"\r\n",
@@ -1108,10 +1111,10 @@
 					"    LOCATION '{delta_table_path}'\r\n",
 					"\"\"\")\r\n",
 					"\r\n",
-					"print(\"Table ECDS_Personal_Circumstances has been registered to the metastore.\")\r\n",
+					"#print(\"Table ECDS_Personal_Circumstances has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 16
 			},
 			{
 				"cell_type": "markdown",
@@ -1176,7 +1179,7 @@
 					"#print(\"Table ECDS_Procedure has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 17
 			},
 			{
 				"cell_type": "markdown",
@@ -1241,7 +1244,7 @@
 					"#print(\"Table ECDS_ReferralsToOtherServices has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 18
 			},
 			{
 				"cell_type": "markdown",
@@ -1303,7 +1306,7 @@
 					"\r\n",
 					"#print(\"Table ECDS_SafeguardingConcern has been registered to the metastore.\")"
 				],
-				"execution_count": null
+				"execution_count": 19
 			},
 			{
 				"cell_type": "markdown",
@@ -1375,7 +1378,7 @@
 					"#print(\"Table ECDS_StoredProc_Log_tbl has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 20
 			},
 			{
 				"cell_type": "markdown",
@@ -1435,7 +1438,7 @@
 					"#print(\"Table ECDS_UpdateErrorText has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 21
 			},
 			{
 				"cell_type": "markdown",
@@ -1501,7 +1504,7 @@
 					"#print(\"Table ECDStoCDS_MappingCodes has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 22
 			},
 			{
 				"cell_type": "markdown",
@@ -1567,7 +1570,7 @@
 					"#print(\"Table ECDStoCDS_MappingSubTypes has been registered to the metastore.\")\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 23
 			},
 			{
 				"cell_type": "markdown",
@@ -1628,7 +1631,7 @@
 					"\r\n",
 					"#print(\"Table refECDS_SensitiveCodesSNOMED has been registered to the metastore with comment.\")"
 				],
-				"execution_count": null
+				"execution_count": 24
 			},
 			{
 				"cell_type": "markdown",
@@ -1784,7 +1787,7 @@
 					"\r\n",
 					"#print(\"Table ECDS_EmergencyVisitData_Main_tbl has been registered to the metastore with comment.\")"
 				],
-				"execution_count": null
+				"execution_count": 25
 			},
 			{
 				"cell_type": "markdown",
@@ -1854,7 +1857,7 @@
 					"\r\n",
 					"#print(\"Table ECDS_Investigations_xTab has been registered to the metastore with comment.\")"
 				],
-				"execution_count": null
+				"execution_count": 26
 			},
 			{
 				"cell_type": "markdown",
@@ -1934,7 +1937,7 @@
 					"\r\n",
 					"#print(\"Table ECDSGrouperInput has been registered to the metastore with comment.\")"
 				],
-				"execution_count": null
+				"execution_count": 27
 			},
 			{
 				"cell_type": "markdown",
@@ -2017,7 +2020,7 @@
 					"\r\n",
 					"#print(\"Table ECDS_Procedures_xTab has been registered to the metastore with comment.\")"
 				],
-				"execution_count": null
+				"execution_count": 28
 			}
 		]
 	}
