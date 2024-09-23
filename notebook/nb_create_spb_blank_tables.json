@@ -1,8 +1,8 @@
 {
-	"name": "nb_create_spb_blank_tables_test",
+	"name": "nb_create_spb_blank_tables",
 	"properties": {
 		"folder": {
-			"name": "nb_create_blank_tables_test"
+			"name": "nb_create_ecds_tables"
 		},
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "b6398384-12b8-4f1e-abd3-dc7c734b5f14"
+				"spark.autotune.trackingId": "f00c7638-b3f6-4b45-90f4-4c731274fdd6"
 			}
 		},
 		"metadata": {
@@ -61,7 +61,45 @@
 					}
 				},
 				"source": [
-					""
+					"# SPB Delta Tables Creation Notebook\r\n",
+					"\r\n",
+					"## Overview\r\n",
+					"\r\n",
+					"This notebook creates multiple **Delta tables** within the **SPB/ECDS** data lake using Microsoft Synapse Analytics. Each cell corresponds to a specific table setup with predefined schemas.\r\n",
+					"\r\n",
+					"## Tables Created\r\n",
+					"\r\n",
+					"1. **ClinicalNoteData_Current**\r\n",
+					"2. **ClinicalNoteData_First**\r\n",
+					"3. **PatientData_Current**\r\n",
+					"4. **PatientVisitHistoryData_Current**\r\n",
+					"5. **StoredProc_Log**\r\n",
+					"6. **VisitArchiveID_delta**\r\n",
+					"\r\n",
+					"Each table is structured to meet specific data requirements, ensuring consistency and efficiency across the SPB data ecosystem.\r\n",
+					"\r\n",
+					"## Setting Default Values During Data Ingestion\r\n",
+					"\r\n",
+					"Default values are set using `df.withColumn`. It's recommended to implement these defaults **during data ingestion** to ensure consistency and reduce post-processing steps.\r\n",
+					"\r\n",
+					"**Guidance:**\r\n",
+					"\r\n",
+					"- **Integrate in ETL Pipelines:**\r\n",
+					"  Incorporate `withColumn` transformations within your ETL processes.\r\n",
+					"  ```python\r\n",
+					"  df = df.withColumn(\"InsertedOn\", current_timestamp()) - all the tables\r\n",
+					"\r\n",
+					"## Primary keys and constraints in Delta tables\r\n",
+					"\r\n",
+					"Delta Lake does not support enforcing unique constraints or primary keys natively.\r\n",
+					"To emulate primary key behavior, you need to handle duplicates during data ingestion \r\n",
+					"\r\n",
+					"**Guidance:**\r\n",
+					"- **Implement data validation and data duplication checks in your data pipelines to ensure data integrity**\r\n",
+					"```python\r\n",
+					"df = df.filter(col(\"visitarchiveid\").isNotNull())\r\n",
+					"df = df.dropDuplicates([\"visitarchiveid\"])\r\n",
+					"```"
 				]
 			},
 			{
@@ -122,7 +160,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_Current\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
@@ -182,7 +220,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table (ensure correct casing)\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_First\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/ClinicalNoteData_First\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table to initialize it\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
@@ -258,7 +296,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table (ensure correct casing)\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/PatientData_Current\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/PatientData_Current\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
@@ -325,7 +363,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table (ensure correct casing)\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/PatientVisitHistoryData_Current\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/PatientVisitHistoryData_Current\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
@@ -375,7 +413,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table (ensure correct casing)\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/StoredProc_Log\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/StoredProc_Log\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table to initialize it\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
@@ -424,7 +462,7 @@
 					"df = spark.createDataFrame([], schema)\r\n",
 					"\r\n",
 					"# Define the path for the Delta table (ensure correct casing)\r\n",
-					"delta_table_path = \"abfss://curated@louisstr.dfs.core.windows.net/ESHT/SPB/VisitArchiveID_delta\"\r\n",
+					"delta_table_path = \"abfss://curated@dlsrxcdevuksdp01.dfs.core.windows.net/ESHT/SPB/VisitArchiveID_delta\"\r\n",
 					"\r\n",
 					"# Write the DataFrame as a Delta table to initialize it\r\n",
 					"df.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").save(delta_table_path)\r\n",
