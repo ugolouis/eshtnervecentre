@@ -20,7 +20,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "2c0c0cd4-dcfb-44d5-a665-7910ded01365"
+				"spark.autotune.trackingId": "bb0e5fed-2dc9-452e-9944-809deb567c94"
 			}
 		},
 		"metadata": {
@@ -558,6 +558,19 @@
 					"schema_eCDS_Procedures_xTab.add(\"InsertedOn\", T.TimestampType(), nullable=False)\r\n",
 					"schema_eCDS_Procedures_xTab.add(\"AmendedOn\", T.TimestampType(), nullable=True)  # Added for consistency\r\n",
 					"\r\n",
+					"\r\n",
+					"# Schema for ECDS_CodedClinicalFindings\r\n",
+					"schema_eCDS_codedclinicalfindings = T.StructType([\r\n",
+					"    T.StructField(\"visitarchiveid\", T.IntegerType(), nullable=False),\r\n",
+					"    T.StructField(\"ObsId\", T.IntegerType(), nullable=False),\r\n",
+					"    T.StructField(\"obsdetailsid\", T.IntegerType(), nullable=False),\r\n",
+					"    T.StructField(\"Coded_FindingSNOMED\", T.StringType(), nullable=True),\r\n",
+					"    T.StructField(\"Coded_FindingDesc\", T.StringType(), nullable=True),\r\n",
+					"    T.StructField(\"Coded_Finding_Timestamp\", T.TimestampType(), nullable=True),\r\n",
+					"    T.StructField(\"InsertedOn\", T.TimestampType(), nullable=False),\r\n",
+					"    T.StructField(\"AmendOn\", T.TimestampType(), nullable=True)\r\n",
+					"])\r\n",
+					"\r\n",
 					"# ---------------------------------------------\r\n",
 					"# Create and Register Delta Tables\r\n",
 					"# ---------------------------------------------\r\n",
@@ -717,10 +730,17 @@
 					"    comment=\"Reference: https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx\"\r\n",
 					")\r\n",
 					"\r\n",
+					"create_and_register_delta_table(\r\n",
+					"    table_name=\"ECDS_CodedClinicalFindings\",\r\n",
+					"    schema=schema_eCDS_codedclinicalfindings,\r\n",
+					"    table_suffix=\"ECDS_CodedClinicalFindings\",\r\n",
+					"    comment=\"Reference: https://digital.nhs.uk/binaries/content/assets/website-assets/services/sus/sus-guidance/legally_restricted_codes-16.xlsx\"\r\n",
+					")\r\n",
+					"\r\n",
 					"# Note: Remember to enforce the primary keys in your write operations.\r\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 10
 			}
 		]
 	}
